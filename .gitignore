@@ -1,0 +1,12 @@
+nbandroid/
+libs/
+res/
+bin/
+gen/
+private/
+build.xml
+custom_rules.xml
+ant.properties
+local.properties
+project.properties
+proguard-project.txt
