@@ -10,7 +10,7 @@ public class JsonRequest extends Request {
     NO_ACCESS = new UnsupportedOperationException();
 
   public JsonRequest(String url) {
-    super(url, HttpClient.CONTENT_TYPE_JSON);
+    super(url, ActivityHttpClient.CONTENT_TYPE_JSON);
     setUseJsonStreamer(true);
     setAutoCloseInputStreams(true);
   }

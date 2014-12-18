@@ -12,9 +12,8 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
 
   public final String url;
 
-  BinaryResponseHandler(String url, BinaryResponse response) {
+  public BinaryResponseHandler(String url, BinaryResponse response) {
     super();
-    setUseSynchronousMode(true);
     this.url = url;
     ArrayList<BinaryResponse> handlers = getHandlers();
     if(null == handlers) {

@@ -7,11 +7,12 @@ import org.json.JSONObject;
 
 class ResponseHandler extends JsonHttpResponseHandler {
 
-  private final Response response;
+  private Response response;
+  private ActivityHttpClient client;
 
-  ResponseHandler(Response response) {
+  public ResponseHandler(ActivityHttpClient client, Response response) {
     super();
-    setUseSynchronousMode(true);
+    this.client = client;
     this.response = response;
   }
 
@@ -26,8 +27,9 @@ class ResponseHandler extends JsonHttpResponseHandler {
     JSONObject result
   ) {
     response.onSuccess(
-      HttpClient.getInstance().normalizeJson(result)
+      client.normalizeJson(result)
     );
+    destroy();
   }
 
   @Override
@@ -37,8 +39,9 @@ class ResponseHandler extends JsonHttpResponseHandler {
     JSONArray result
   ) {
     response.onSuccess(
-      HttpClient.getInstance().normalizeJson(result)
+      client.normalizeJson(result)
     );
+    destroy();
   }
 
   @Override
@@ -65,8 +68,9 @@ class ResponseHandler extends JsonHttpResponseHandler {
   ) {
     response.onFailure(
       error,
-      HttpClient.getInstance().normalizeJson(result)
+      client.normalizeJson(result)
     );
+    destroy();
   }
 
   @Override
@@ -78,7 +82,13 @@ class ResponseHandler extends JsonHttpResponseHandler {
   ) {
     response.onFailure(
       error,
-      HttpClient.getInstance().normalizeJson(result)
+      client.normalizeJson(result)
     );
+    destroy();
+  }
+
+  private void destroy() {
+    response = null;
+    client = null;
   }
 }

@@ -1,10 +1,6 @@
 package com.fine47.http;
 
-import android.app.Application;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.provider.Settings;
 import android.util.Log;
 import com.fine47.json.JsonArrayInterface;
 import com.fine47.json.JsonObjectInterface;
@@ -17,31 +13,26 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class HttpClient extends AsyncHttpClient {
+public class ActivityHttpClient extends AsyncHttpClient {
 
   public final static String CONTENT_TYPE_JSON = "application/json";
 
   /**
    * Debug tag for this class.
    */
-  public final static String LOG_TAG = "HttpClient";
+  public final static String LOG_TAG = "AndroidHttpClient";
 
-  private static HttpClient instance;
   private static String userAgent = System.getProperty("http.agent");
 
-  private final Application app;
   private final Class<? extends JsonObjectInterface> jsonObjectClass;
   private final Class<? extends JsonArrayInterface> jsonArrayClass;
 
+  private Context ctx;
   private CookieStore store;
   private long lastCleanup;
 
-  private boolean isConnected;
-  private boolean isWifiConnected;
-  private boolean isMobileConnected;
-
-  private HttpClient(
-    Application app,
+  public ActivityHttpClient(
+    Context ctx,
     Class<? extends JsonObjectInterface> jsonObjectClass,
     Class<? extends JsonArrayInterface> jsonArrayClass
   ) {
@@ -60,38 +51,19 @@ public class HttpClient extends AsyncHttpClient {
     setResponseTimeout(30000);
     setMaxRetriesAndTimeout(DEFAULT_MAX_RETRIES, 250);
 
-    // Initialize final values.
-    this.app = app;
+    // Initialize initial values.
+    this.ctx = ctx;
     this.jsonObjectClass = jsonObjectClass;
     this.jsonArrayClass = jsonArrayClass;
-
-    // Initial values for network status.
-    isOnline();
   }
 
-  public static void start(
-    Application app,
-    Class<JsonObjectInterface> jsonObjectClass,
-    Class<JsonArrayInterface> jsonArrayClass
-  ) {
-    assert null == instance;
-    assert null != app;
-    instance = new HttpClient(app, jsonObjectClass, jsonArrayClass);
+  public Context getContext() {
+    return ctx;
   }
 
-  public static void stop() {
-    assert null != instance;
-    instance.cancelRequests();
-    instance = null;
-  }
-
-  public static HttpClient getInstance() {
-    assert null != instance;
-    return instance;
-  }
-
-  public void cancelAllRequests() {
-    cancelAllRequests(true);
+  public void shutdown() {
+    cancelRequests();
+    ctx = null;
   }
 
   /**
@@ -131,66 +103,12 @@ public class HttpClient extends AsyncHttpClient {
     return userAgent;
   }
 
-  public boolean isOnline() {
-    try {
-      ConnectivityManager cm = (ConnectivityManager)app.getSystemService(
-        Context.CONNECTIVITY_SERVICE);
-
-      NetworkInfo netInfo = cm.getActiveNetworkInfo();
-      if(null != netInfo) {
-        // Check for availability and if it's really connected.
-        isConnected =
-          netInfo.isAvailable() &&
-          netInfo.isConnectedOrConnecting();
-
-        // Get available networks' info.
-        NetworkInfo[] netsInfo = cm.getAllNetworkInfo();
-
-        // What kind of networks are available.
-        for(NetworkInfo ni : netsInfo) {
-          if(ni.isConnected()) {
-            String niType = ni.getTypeName();
-            if("WIFI".equalsIgnoreCase(niType)) {
-              isWifiConnected = true;
-            } else if("MOBILE".equalsIgnoreCase(niType)) {
-              isMobileConnected = true;
-            }
-          }
-        }
-      } else {
-        isConnected = false;
-      }
-
-      return isConnected;
-    } catch(Throwable error) {
-      Log.e(LOG_TAG, "Error while detecting network status.", error);
-    }
-
-    return isConnected;
-  }
-
-  public boolean isWifi() {
-    return isWifiConnected;
-  }
-
-  public boolean isMobile() {
-    return isMobileConnected;
-  }
-
-  @SuppressWarnings("deprecation")
-  public boolean isAirplaneMode() {
-    String airplaneMode = 17 <= android.os.Build.VERSION.SDK_INT
-        ? Settings.Global.AIRPLANE_MODE_ON
-        : Settings.System.AIRPLANE_MODE_ON;
-    return 0 != Settings.System.getInt(app.getContentResolver(), airplaneMode, 0);
-  }
-
   public void cancelRequests() {
     cancelRequests(true);
   }
 
   public void cancelRequests(boolean mayInterruptIfRunning) {
-    cancelRequests(app, mayInterruptIfRunning);
+    cancelRequests(ctx, mayInterruptIfRunning);
   }
 
   public JsonObjectInterface normalizeJson(JSONObject data) {
@@ -270,18 +188,18 @@ public class HttpClient extends AsyncHttpClient {
 
   public void dispatch(Request request, Response response) {
     Log.d(LOG_TAG, "Dispatching: POST " + request.url);
-    post(app,
+    post(ctx,
       request.url,
       request.getHeaders(),
       request,
       request.contentType,
-      new ResponseHandler(response)
+      new ResponseHandler(this, response)
     );
   }
 
   public void dispatch(BinaryRequest request, BinaryResponse response) {
     Log.d(LOG_TAG, "Dispatching: GET " + request.url);
-    get(app,
+    get(ctx,
       request.url,
       request.getHeaders(),
       request,
