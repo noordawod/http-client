@@ -215,7 +215,7 @@ public class SecureSocketFactory extends SSLSocketFactory {
    *
    * @param socket The socket to alter
    * @param host Hostname to connec to
-   * @see https://code.google.com/p/android/issues/detail?id=13117#c14
+   * @see <a href="https://code.google.com/p/android/issues/detail?id=13117#c14">Details about this workaround</a>
    */
   private void injectHostname(Socket socket, String host) {
     if(14 > android.os.Build.VERSION.SDK_INT) {

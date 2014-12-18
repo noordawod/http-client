@@ -164,9 +164,11 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Returns the currently active cookie store.
+   * Returns the currently active cookie store. Before returning it, though, a
+   * cleanup is made to the cookie store to remove expired cookies (once every
+   * 5 minutes).
    *
-   * @return
+   * @return active cookie store
    */
   public CookieStore getCookieStore() {
     long now = System.currentTimeMillis();
