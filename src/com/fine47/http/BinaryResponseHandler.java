@@ -14,12 +14,23 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
 
   public BinaryResponseHandler(String url, BinaryResponse response) {
     super();
+
+    // Binary downloads will always use the pool thread to fire callbacks.
+    setUsePoolThread(true);
+
+    // Remember the URL.
     this.url = url;
+
+    // Get defined handlers for this URL.
     ArrayList<BinaryResponse> handlers = getHandlers();
+
+    // If there are no handlers defined, create a new list.
     if(null == handlers) {
       handlers = new ArrayList();
       HANDLERS.put(this.url, handlers);
     }
+
+    // Add the response handler to the list.
     handlers.add(response);
   }
 

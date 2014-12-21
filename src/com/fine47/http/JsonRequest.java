@@ -9,6 +9,11 @@ public class JsonRequest extends Request {
   private final static UnsupportedOperationException
     NO_ACCESS = new UnsupportedOperationException();
 
+  /**
+   * Creates a new JSON request and use the specified URL as its end-point.
+   *
+   * @param url request's end-point URL
+   */
   public JsonRequest(String url) {
     super(url, ActivityHttpClient.CONTENT_TYPE_JSON);
     setUseJsonStreamer(true);

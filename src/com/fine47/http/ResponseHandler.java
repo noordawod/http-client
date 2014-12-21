@@ -14,6 +14,9 @@ class ResponseHandler extends JsonHttpResponseHandler {
     super();
     this.client = client;
     this.response = response;
+
+    // If this is a long running operation, we'd like to run on the pool thread.
+    setUsePoolThread(response.isLongRunning());
   }
 
   @Override
