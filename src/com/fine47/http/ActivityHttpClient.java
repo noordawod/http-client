@@ -23,12 +23,12 @@ public class ActivityHttpClient extends AsyncHttpClient {
   /**
    * Debug tag for this class.
    */
-  public final static String LOG_TAG = "AndroidHttpClient";
+  public final static String LOG_TAG = "ActivityHttpClient";
 
   private static String userAgent = System.getProperty("http.agent");
 
-  private final Class<? extends JsonObjectInterface> jsonObjectClass;
-  private final Class<? extends JsonArrayInterface> jsonArrayClass;
+  protected final Class<? extends JsonObjectInterface> jsonObjectClass;
+  protected final Class<? extends JsonArrayInterface> jsonArrayClass;
 
   private Context ctx;
   private CookieStore store;
@@ -158,6 +158,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @return converted JSON object
    */
   public JsonObjectInterface normalizeJson(JSONObject data) {
+    Exception error;
     try {
       // Create a new JSON object.
       JsonObjectInterface json = jsonObjectClass.newInstance();
@@ -168,19 +169,13 @@ public class ActivityHttpClient extends AsyncHttpClient {
       }
 
       return json;
-    } catch(InstantiationException error) {
-      Log.e(
-        LOG_TAG,
-        "Unable to instantiate a new JSON object.",
-        error);
-      return null;
-    } catch(IllegalAccessException error) {
-      Log.e(
-        LOG_TAG,
-        "Illegal access while instantiating a new JSON object.",
-        error);
-      return null;
+    } catch(InstantiationException e) {
+      error = e;
+    } catch(IllegalAccessException e) {
+      error = e;
     }
+    Log.e(LOG_TAG, "Unable to instantiate a new JSON object.", error);
+    return null;
   }
 
   /**
@@ -191,6 +186,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @return converted JSON array
    */
   public JsonArrayInterface normalizeJson(JSONArray data) {
+    Exception error;
     try {
       // Create a new JSON object.
       JsonArrayInterface json = jsonArrayClass.newInstance();
@@ -201,19 +197,13 @@ public class ActivityHttpClient extends AsyncHttpClient {
       }
 
       return json;
-    } catch(InstantiationException error) {
-      Log.e(
-        LOG_TAG,
-        "Unable to instantiate a new JSON object.",
-        error);
-      return null;
-    } catch(IllegalAccessException error) {
-      Log.e(
-        LOG_TAG,
-        "Illegal access while instantiating a new JSON object.",
-        error);
-      return null;
+    } catch(InstantiationException e) {
+      error = e;
+    } catch(IllegalAccessException e) {
+      error = e;
     }
+    Log.e(LOG_TAG, "Unable to instantiate a new JSON array.", error);
+    return null;
   }
 
   /**
