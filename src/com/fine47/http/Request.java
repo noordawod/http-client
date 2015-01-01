@@ -114,9 +114,9 @@ public class Request extends RequestParams {
     for(final String key : keys) {
       Object value = json.get(key);
       if(value instanceof JsonObjectInterface) {
-        put(key, (JsonObjectInterface)value);
+        put(key, ((JsonObjectInterface)value).getNative());
       } else if(value instanceof JsonArrayInterface) {
-        put(key, (JsonArrayInterface)value);
+        put(key, ((JsonArrayInterface)value).getNative());
       } else if(value instanceof Number) {
         put(key, (Number)value);
       } else if(value instanceof Boolean) {

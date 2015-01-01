@@ -40,6 +40,14 @@ public class JsonRequest extends Request {
     }
   }
 
+  public void put(String key, JsonObjectInterface value) {
+    put(key, value.getNative());
+  }
+
+  public void put(String key, JsonArrayInterface value) {
+    put(key, value.getNative());
+  }
+
   @Override
   public void put(String key, String value) {
     if(null != key && null != value) {
@@ -54,18 +62,6 @@ public class JsonRequest extends Request {
   }
 
   public void put(String key, Boolean value) {
-    if(null != key && null != value) {
-      super.put(key, value);
-    }
-  }
-
-  public void put(String key, JsonObjectInterface value) {
-    if(null != key && null != value) {
-      super.put(key, value);
-    }
-  }
-
-  public void put(String key, JsonArrayInterface value) {
     if(null != key && null != value) {
       super.put(key, value);
     }
