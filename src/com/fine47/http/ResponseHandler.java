@@ -1,5 +1,6 @@
 package com.fine47.http;
 
+import android.util.Log;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -29,6 +30,11 @@ class ResponseHandler extends JsonHttpResponseHandler {
     Header[] headers,
     JSONObject result
   ) {
+    if(ActivityHttpClient.isDebugging()) {
+      Log.d(
+        ActivityHttpClient.LOG_TAG,
+        "Response JSON (Object): \n" + result.toString());
+    }
     response.onSuccess(
       client.normalizeJson(result)
     );
@@ -41,6 +47,11 @@ class ResponseHandler extends JsonHttpResponseHandler {
     Header[] headers,
     JSONArray result
   ) {
+    if(ActivityHttpClient.isDebugging()) {
+      Log.d(
+        ActivityHttpClient.LOG_TAG,
+        "Response JSON (Array): \n" + result.toString());
+    }
     response.onSuccess(
       client.normalizeJson(result)
     );

@@ -30,6 +30,8 @@ public class ActivityHttpClient extends AsyncHttpClient {
   protected final Class<? extends JsonObjectInterface> jsonObjectClass;
   protected final Class<? extends JsonArrayInterface> jsonArrayClass;
 
+  private static boolean isDebugging;
+
   private Context ctx;
   private CookieStore store;
   private long lastCleanup;
@@ -37,6 +39,24 @@ public class ActivityHttpClient extends AsyncHttpClient {
   private boolean isConnected;
   private boolean isWifiConnected;
   private boolean isMobileConnected;
+
+  /**
+   * Returns whether debugging mode is turned on.
+   *
+   * @return TRUE if debugging is on, FALSE otherwise
+   */
+  public static boolean isDebugging() {
+    return isDebugging;
+  }
+
+  /**
+   * Sets debugging mode.
+   *
+   * @param value TRUE to turn debugging mode on
+   */
+  public static void setIsDebugging(boolean value) {
+    isDebugging = value;
+  }
 
   /**
    * Create a new HTTP client and attach it to the specified context.
@@ -78,6 +98,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
         isOnline();
       }
     });
+
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Created new " + getClass().getName() + " instance.");
+    }
   }
 
   /**

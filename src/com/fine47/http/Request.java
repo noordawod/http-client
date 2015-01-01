@@ -1,5 +1,6 @@
 package com.fine47.http;
 
+import android.util.Log;
 import com.fine47.json.JsonArrayInterface;
 import com.fine47.json.JsonObjectInterface;
 import com.loopj.android.http.AsyncHttpClient;
@@ -75,6 +76,10 @@ public class Request extends RequestParams {
       AsyncHttpClient.HEADER_ACCEPT_ENCODING,
       AsyncHttpClient.ENCODING_GZIP)
     );
+
+    if(ActivityHttpClient.isDebugging()) {
+      Log.d(ActivityHttpClient.LOG_TAG, "Request: \n" + this);
+    }
   }
 
   /**
