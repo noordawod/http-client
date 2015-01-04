@@ -33,7 +33,8 @@ class ResponseHandler extends JsonHttpResponseHandler {
     if(ActivityHttpClient.isDebugging()) {
       Log.d(
         ActivityHttpClient.LOG_TAG,
-        "Response JSON (Object): \n" + result.toString());
+        "Response JSON (Object): \n" +
+        (null == result ? "null" : result.toString()));
     }
     response.onSuccess(
       client.normalizeJson(result)
@@ -50,7 +51,8 @@ class ResponseHandler extends JsonHttpResponseHandler {
     if(ActivityHttpClient.isDebugging()) {
       Log.d(
         ActivityHttpClient.LOG_TAG,
-        "Response JSON (Array): \n" + result.toString());
+        "Response JSON (Array): \n" +
+        (null == result ? "null" : result.toString()));
     }
     response.onSuccess(
       client.normalizeJson(result)
@@ -80,6 +82,12 @@ class ResponseHandler extends JsonHttpResponseHandler {
     Throwable error,
     JSONObject result
   ) {
+    if(ActivityHttpClient.isDebugging()) {
+      Log.e(
+        ActivityHttpClient.LOG_TAG,
+        "Failure while expecting JSON (Object) result: \n" +
+        (null == result ? "null" : result.toString()));
+    }
     response.onFailure(
       error,
       client.normalizeJson(result)
@@ -94,6 +102,12 @@ class ResponseHandler extends JsonHttpResponseHandler {
     Throwable error,
     JSONArray result
   ) {
+    if(ActivityHttpClient.isDebugging()) {
+      Log.e(
+        ActivityHttpClient.LOG_TAG,
+        "Failure while expecting JSON (Array) result: \n" +
+        (null == result ? "null" : result.toString()));
+    }
     response.onFailure(
       error,
       client.normalizeJson(result)
