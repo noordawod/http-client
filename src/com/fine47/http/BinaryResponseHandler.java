@@ -42,6 +42,11 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
 
   @Override
   public void onCancel() {
+    if(ActivityHttpClient.isDebugging()) {
+      Log.w(
+        ActivityHttpClient.LOG_TAG,
+        "Binary request cancelled for URL: " + url);
+    }
   }
 
   @Override
@@ -93,9 +98,10 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
     }
     HANDLERS.remove(url);
     if(ActivityHttpClient.isDebugging()) {
-      Log.i(
+      Log.e(
         ActivityHttpClient.LOG_TAG,
-        "Binary request failure for URL: " + url);
+        "Binary request failed for URL: " + url + " (code=" + statusCode + ")",
+        error);
     }
   }
 
