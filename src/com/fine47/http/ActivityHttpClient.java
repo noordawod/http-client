@@ -198,7 +198,9 @@ public class ActivityHttpClient extends AsyncHttpClient {
     } catch(IllegalAccessException e) {
       error = e;
     }
-    Log.e(LOG_TAG, "Unable to instantiate a new JSON object.", error);
+    if(isDebugging()) {
+      Log.e(LOG_TAG, "Unable to instantiate a new JSON object.", error);
+    }
     return null;
   }
 
@@ -226,7 +228,9 @@ public class ActivityHttpClient extends AsyncHttpClient {
     } catch(IllegalAccessException e) {
       error = e;
     }
-    Log.e(LOG_TAG, "Unable to instantiate a new JSON array.", error);
+    if(isDebugging()) {
+      Log.e(LOG_TAG, "Unable to instantiate a new JSON array.", error);
+    }
     return null;
   }
 
@@ -294,7 +298,9 @@ public class ActivityHttpClient extends AsyncHttpClient {
 
       return isConnected;
     } catch(Throwable error) {
-      Log.e(LOG_TAG, "Error while detecting network status.", error);
+      if(isDebugging()) {
+        Log.e(LOG_TAG, "Error while detecting network status.", error);
+      }
     }
 
     return isConnected;
@@ -344,7 +350,9 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param response to handle the result
    */
   public void dispatch(Request request, Response response) {
-    Log.d(LOG_TAG, "Dispatching: POST " + request.url);
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching: POST " + request.url);
+    }
     post(ctx,
       request.url,
       request.getHeaders(),
@@ -366,7 +374,9 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param response to handle the result
    */
   public void dispatch(BinaryRequest request, BinaryResponse response) {
-    Log.d(LOG_TAG, "Dispatching: GET " + request.url);
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching: GET " + request.url);
+    }
     get(ctx,
       request.url,
       request.getHeaders(),
