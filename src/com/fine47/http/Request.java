@@ -82,6 +82,11 @@ public class Request extends RequestParams {
     }
   }
 
+  @Override
+  public String toString() {
+    return url + " (" + (noCache ? "Not cached" : "Cached") + ")";
+  }
+
   /**
    * Add the specified header to the request.
    *
