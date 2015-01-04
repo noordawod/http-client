@@ -1,5 +1,6 @@
 package com.fine47.http;
 
+import android.util.Log;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,11 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
     if(null == handlers) {
       handlers = new ArrayList();
       HANDLERS.put(this.url, handlers);
+      if(ActivityHttpClient.isDebugging()) {
+        Log.i(
+          ActivityHttpClient.LOG_TAG,
+          "Created new handlers array for URL: " + url);
+      }
     }
 
     // Add the response handler to the list.
@@ -45,6 +51,11 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
       handlers.clear();
     }
     HANDLERS.remove(url);
+    if(ActivityHttpClient.isDebugging()) {
+      Log.i(
+        ActivityHttpClient.LOG_TAG,
+        "Binary request finished for URL: " + url);
+    }
   }
 
   @Override
@@ -58,6 +69,11 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
       for(BinaryResponse handler : handlers) {
         handler.onSuccess(response);
       }
+    }
+    if(ActivityHttpClient.isDebugging()) {
+      Log.i(
+        ActivityHttpClient.LOG_TAG,
+        "Binary request successful for URL: " + url);
     }
   }
 
@@ -76,6 +92,11 @@ class BinaryResponseHandler extends BinaryHttpResponseHandler {
       handlers.clear();
     }
     HANDLERS.remove(url);
+    if(ActivityHttpClient.isDebugging()) {
+      Log.i(
+        ActivityHttpClient.LOG_TAG,
+        "Binary request failure for URL: " + url);
+    }
   }
 
   private ArrayList<BinaryResponse> getHandlers() {
