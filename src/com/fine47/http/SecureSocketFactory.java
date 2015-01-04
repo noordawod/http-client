@@ -29,8 +29,6 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 
 public class SecureSocketFactory extends SSLSocketFactory {
 
-  private final static String LOG_TAG = "SecureSocketFactory";
-
   private final static ConcurrentHashMap<String, SecureSocketFactory>
     instances = new ConcurrentHashMap();
 
@@ -102,15 +100,17 @@ public class SecureSocketFactory extends SSLSocketFactory {
         } else try {
           for(X509Certificate cert : chain) {
 /*
-            Log.d(LOG_TAG, "Server Certificate Details:");
-            Log.d(LOG_TAG, "---------------------------");
-            Log.d(LOG_TAG, "IssuerDN: " + cert.getIssuerDN().toString());
-            Log.d(LOG_TAG, "SubjectDN: " + cert.getSubjectDN().toString());
-            Log.d(LOG_TAG, "Serial Number: " + cert.getSerialNumber());
-            Log.d(LOG_TAG, "Version: " + cert.getVersion());
-            Log.d(LOG_TAG, "Not before: " + cert.getNotBefore().toGMTString());
-            Log.d(LOG_TAG, "Not after: " + cert.getNotAfter().toGMTString());
-            Log.d(LOG_TAG, "---------------------------");
+            if(ActivityHttpClient.isDebugging()) {
+              Log.d(LOG_TAG, "Server Certificate Details:");
+              Log.d(LOG_TAG, "---------------------------");
+              Log.d(LOG_TAG, "IssuerDN: " + cert.getIssuerDN().toString());
+              Log.d(LOG_TAG, "SubjectDN: " + cert.getSubjectDN().toString());
+              Log.d(LOG_TAG, "Serial Number: " + cert.getSerialNumber());
+              Log.d(LOG_TAG, "Version: " + cert.getVersion());
+              Log.d(LOG_TAG, "Not before: " + cert.getNotBefore().toGMTString());
+              Log.d(LOG_TAG, "Not after: " + cert.getNotAfter().toGMTString());
+              Log.d(LOG_TAG, "---------------------------");
+            }
 */
             // Make sure that it hasn't expired.
             cert.checkValidity();
@@ -127,9 +127,9 @@ public class SecureSocketFactory extends SSLSocketFactory {
         } catch(SignatureException ex) {
           error = ex;
         }
-        if(null != error) {
+        if(null != error && ActivityHttpClient.isDebugging()) {
           Log.e(
-            LOG_TAG,
+            ActivityHttpClient.LOG_TAG,
             "Error while setting up a secure socket factory.",
             error);
           throw new CertificateException(error);
@@ -207,6 +207,22 @@ public class SecureSocketFactory extends SSLSocketFactory {
     return sslCtx
       .getSocketFactory()
       .createSocket();
+  }
+
+  public String getStoreId() {
+    return storeId;
+  }
+
+  public SSLContext getSslContext() {
+    return sslCtx;
+  }
+
+  public X509Certificate[] getAcceptedIssuers() {
+    return acceptedIssuers;
+  }
+
+  public PublicKey getPublicKey() {
+    return publicKey;
   }
 
   /**
