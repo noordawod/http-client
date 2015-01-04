@@ -9,17 +9,17 @@ public class BinaryRequest extends Request {
    * @param url request URL
    */
   public BinaryRequest(String url) {
-    this(url, null);
+    this(url, false);
   }
 
   /**
-   * Create a new binary request for the specified end-point URL along with the
-   * specified content type.
+   * Create a new binary request for the specified end-point URL and control
+   * whether the response should be cached or not.
    *
    * @param url request URL
-   * @param contentType request's content type
+   * @param noCache TRUE to enable caching for this request
    */
-  public BinaryRequest(String url, String contentType) {
-    super(url, contentType, true);
+  public BinaryRequest(String url, boolean noCache) {
+    super(url, null, noCache);
   }
 }
