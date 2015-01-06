@@ -21,7 +21,7 @@ Dependencies
 
 The library depends on these libraries:
 
-* [AsyncHttpClient]()
+* [AsyncHttpClient](https://github.com/loopj/android-async-http)
 * [Android-Cache](https://github.com/noordawod/android-cache) -- simple, fast and
   robust caching library for Android (also written by myself)
 * [JsonInterface](https://github.com/noordawod/json-interface) -- an interface 
