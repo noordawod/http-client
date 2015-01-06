@@ -27,9 +27,9 @@
 
 package com.fine47.http;
 
-import com.fine47.http.request.Request;
+import com.fine47.http.request.AbstractRequest;
 import com.fine47.http.request.ImageRequest;
-import com.fine47.http.response.Response;
+import com.fine47.http.response.AbstractResponse;
 import com.fine47.http.response.ImageResponse;
 import com.fine47.cache.CacheInterface;
 import java.util.concurrent.ExecutorService;
@@ -103,8 +103,8 @@ public class DownloadManager<E> {
    * @param response generic handler to handle the result
    */
   public <M>void dispatch(
-    final Request<M> request,
-    final Response<E, M> response
+    final AbstractRequest<M> request,
+    final AbstractResponse<E, M> response
   ) {
     // Try to get a cached entry first for this URL.
     final E cacheEntry = cache.get(request.url);

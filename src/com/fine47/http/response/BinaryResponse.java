@@ -34,6 +34,6 @@ package com.fine47.http.response;
  *
  * @param <M> meta-data type which could be accompanying the request
  */
-public interface BinaryResponse<M> extends Response<byte[], M> {
+public interface BinaryResponse<M> extends AbstractResponse<byte[], M> {
 
 }

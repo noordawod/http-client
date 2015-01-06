@@ -34,7 +34,7 @@ import android.graphics.Bitmap;
  *
  * @param <M> meta-data type which could be accompanying the request
  */
-public interface ImageResponse<M> extends Response<Bitmap, M> {
+public interface ImageResponse<M> extends AbstractResponse<Bitmap, M> {
 
   /**
    * Whether the generated {@link Bitmap} should be mutable (able to be

@@ -29,7 +29,7 @@ package com.fine47.http;
 
 import com.fine47.http.request.JsonRequest;
 import com.fine47.http.request.ImageRequest;
-import com.fine47.http.request.Request;
+import com.fine47.http.request.AbstractRequest;
 import com.fine47.http.response.JsonResponse;
 import com.fine47.http.response.ImageResponse;
 import android.content.Context;
@@ -367,7 +367,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param response JSON handler to handle the result
    */
   public <T extends JsonInterface, M>void dispatch(
-    Request.TYPE type,
+    AbstractRequest.TYPE type,
     JsonRequest<M> request,
     JsonResponse<T, M> response
   ) {
@@ -388,7 +388,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param response image handler to handle the result
    */
   public <M>void dispatch(
-    Request.TYPE type,
+    AbstractRequest.TYPE type,
     ImageRequest<M> request,
     ImageResponse<M> response
   ) {
@@ -409,8 +409,8 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler generic handler to handle the result
    */
   public <M>void dispatch(
-    Request.TYPE type,
-    Request<M> request,
+    AbstractRequest.TYPE type,
+    AbstractRequest<M> request,
     ResponseHandlerInterface handler
   ) {
     if(isDebugging()) {
@@ -450,7 +450,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler response to handle the result
    * @see Request.TYPE#HEAD
    */
-  protected void headImpl(Request request, ResponseHandlerInterface handler) {
+  protected void headImpl(
+    AbstractRequest request,
+    ResponseHandlerInterface handler
+  ) {
     head(
       ctx,
       request.url,
@@ -470,7 +473,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler response to handle the result
    * @see Request.TYPE#GET
    */
-  protected void getImpl(Request request, ResponseHandlerInterface handler) {
+  protected void getImpl(
+    AbstractRequest request,
+    ResponseHandlerInterface handler
+  ) {
     get(
       ctx,
       request.url,
@@ -490,7 +496,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler response to handle the result
    * @see Request.TYPE#POST
    */
-  protected void postImpl(Request request, ResponseHandlerInterface handler) {
+  protected void postImpl(
+    AbstractRequest request,
+    ResponseHandlerInterface handler
+  ) {
     post(
       ctx,
       request.url,
@@ -511,7 +520,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler response to handle the result
    * @see Request.TYPE#PUT
    */
-  protected void putImpl(Request request, ResponseHandlerInterface handler) {
+  protected void putImpl(
+    AbstractRequest request,
+    ResponseHandlerInterface handler
+  ) {
     put(
       ctx,
       request.url,
@@ -532,7 +544,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler response to handle the result
    * @see Request.TYPE#PATCH
    */
-  protected void patchImpl(Request request, ResponseHandlerInterface handler) {
+  protected void patchImpl(
+    AbstractRequest request,
+    ResponseHandlerInterface handler
+  ) {
     patch(
       ctx,
       request.url,
@@ -553,7 +568,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param handler response to handle the result
    * @see Request.TYPE#DELETE
    */
-  protected void deleteImpl(Request request, ResponseHandlerInterface handler) {
+  protected void deleteImpl(
+    AbstractRequest request,
+    ResponseHandlerInterface handler
+  ) {
     delete(
       ctx,
       request.url,
@@ -574,7 +592,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @return HTTP entity on success, NULL otherwise
    */
   protected HttpEntity getEntity(
-    Request request,
+    AbstractRequest request,
     ResponseHandlerInterface handler
   ) {
     try {

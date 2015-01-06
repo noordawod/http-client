@@ -43,7 +43,7 @@ import org.apache.http.message.BasicHeader;
  *
  * @param <M> meta-data type which could be accompanying this request
  */
-public class Request<M> extends RequestParams {
+public class AbstractRequest<M> extends RequestParams {
 
   public enum TYPE {
     HEAD, GET, POST, PUT, PATCH, DELETE
@@ -75,7 +75,7 @@ public class Request<M> extends RequestParams {
    *
    * @param url request URL
    */
-  public Request(String url) {
+  public AbstractRequest(String url) {
     this(url, null, null);
   }
 
@@ -86,7 +86,7 @@ public class Request<M> extends RequestParams {
    * @param url request URL
    * @param contentType request's content type
    */
-  public Request(String url, String contentType) {
+  public AbstractRequest(String url, String contentType) {
     this(url, contentType, null);
   }
 
@@ -97,7 +97,7 @@ public class Request<M> extends RequestParams {
    * @param url request URL
    * @param metaData optional meta-data to accompany the request
    */
-  public Request(String url, M metaData) {
+  public AbstractRequest(String url, M metaData) {
     this(url, null, metaData);
   }
 
@@ -109,7 +109,7 @@ public class Request<M> extends RequestParams {
    * @param contentType request's content type
    * @param metaData optional meta-data to accompany the request
    */
-  protected Request(String url, String contentType, M metaData) {
+  protected AbstractRequest(String url, String contentType, M metaData) {
     super();
 
     this.url = url;
@@ -141,7 +141,7 @@ public class Request<M> extends RequestParams {
    * @param header to add to the request
    * @return "this" request, suitable for chaining
    */
-  public Request addHeader(Header header) {
+  public AbstractRequest addHeader(Header header) {
     headers.add(header);
     return this;
   }
@@ -153,7 +153,7 @@ public class Request<M> extends RequestParams {
    * @param value header's value to add to the request
    * @return "this" request, suitable for chaining
    */
-  public Request addHeader(String name, String value) {
+  public AbstractRequest addHeader(String name, String value) {
     return addHeader(new BasicHeader(name, value));
   }
 

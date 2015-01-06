@@ -37,7 +37,9 @@ import org.json.*;
  * @param <T> type of JSON entity which this response will handle
  * @param <M> meta-data type which could be accompanying original request
  */
-public interface JsonResponse<T extends JsonInterface, M> extends Response<T, M> {
+public interface JsonResponse<T extends JsonInterface, M>
+  extends AbstractResponse<T, M>
+{
 
   /**
    * Allows implementations to convert a native JSON entity ({@link JSONObject}

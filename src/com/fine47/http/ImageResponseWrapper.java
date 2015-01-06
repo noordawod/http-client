@@ -30,9 +30,8 @@ package com.fine47.http;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import com.fine47.http.ActivityHttpClient;
 import com.fine47.http.request.ImageRequest;
-import com.fine47.http.request.Request;
+import com.fine47.http.request.AbstractRequest;
 import com.fine47.http.response.BinaryResponse;
 import com.fine47.http.response.ImageResponse;
 
@@ -62,7 +61,7 @@ class ImageResponseWrapper<M>
   }
 
   @Override
-  public void onSuccess(byte[] bytes, Request request) {
+  public void onSuccess(byte[] bytes, AbstractRequest request) {
     final ImageRequest imageRequest = (ImageRequest)request;
 
     // Use high-resolution first to generate the bitmap.
@@ -98,7 +97,11 @@ class ImageResponseWrapper<M>
   }
 
   @Override
-  public void onFailure(byte[] bytes, Request request, Throwable error) {
+  public void onFailure(
+    byte[] bytes,
+    AbstractRequest request,
+    Throwable error
+  ) {
     response.onFailure(null, request, error);
   }
 

@@ -28,8 +28,7 @@
 package com.fine47.http;
 
 import android.util.Log;
-import com.fine47.http.ActivityHttpClient;
-import com.fine47.http.request.Request;
+import com.fine47.http.request.AbstractRequest;
 import com.fine47.http.response.BinaryResponse;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 import java.util.ArrayList;
@@ -41,9 +40,9 @@ class BinaryResponseWrapper extends BinaryHttpResponseHandler {
   private final static HashMap<String, ArrayList<BinaryResponse>>
     HANDLERS = new HashMap(100);
 
-  private final Request request;
+  private final AbstractRequest request;
 
-  public BinaryResponseWrapper(Request request) {
+  public BinaryResponseWrapper(AbstractRequest request) {
     super();
 
     // Always use the pool thread to fire callbacks.

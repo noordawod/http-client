@@ -28,9 +28,9 @@
 package com.fine47.http;
 
 import com.fine47.cache.CacheInterface;
-import com.fine47.http.request.Request;
+import com.fine47.http.request.AbstractRequest;
 import com.fine47.http.response.BinaryResponse;
-import com.fine47.http.response.Response;
+import com.fine47.http.response.AbstractResponse;
 import org.apache.http.HttpException;
 
 class DownloadResponseWrapper
@@ -39,12 +39,12 @@ class DownloadResponseWrapper
 {
 
   private final CacheInterface cache;
-  private final Response response;
+  private final AbstractResponse response;
 
   public DownloadResponseWrapper(
     CacheInterface cache,
-    Request request,
-    Response response
+    AbstractRequest request,
+    AbstractResponse response
   ) {
     super(request);
 
@@ -62,7 +62,7 @@ class DownloadResponseWrapper
   }
 
   @Override
-  public void onSuccess(byte[] bytes, Request request) {
+  public void onSuccess(byte[] bytes, AbstractRequest request) {
     if(null == bytes || 0 == bytes.length) {
       response.onFailure(
         bytes,
@@ -79,7 +79,11 @@ class DownloadResponseWrapper
   }
 
   @Override
-  public void onFailure(byte[] bytes, Request request, Throwable error) {
+  public void onFailure(
+    byte[] bytes,
+    AbstractRequest request,
+    Throwable error
+  ) {
     response.onFailure(null, request, error);
   }
 }

@@ -35,7 +35,7 @@ import android.graphics.Bitmap;
  *
  * @param <M> meta-data type which could be accompanying this request
  */
-public class ImageRequest<M> extends Request<M> {
+public class ImageRequest<M> extends AbstractRequest<M> {
 
   /**
    * Preferred bitmap configuration for the downloaded image.

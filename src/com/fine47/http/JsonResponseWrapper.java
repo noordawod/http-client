@@ -28,7 +28,6 @@
 package com.fine47.http;
 
 import android.util.Log;
-import com.fine47.http.ActivityHttpClient;
 import com.fine47.http.request.JsonRequest;
 import com.fine47.http.response.JsonResponse;
 import com.fine47.json.JsonInterface;

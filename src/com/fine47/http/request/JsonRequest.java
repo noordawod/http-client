@@ -37,7 +37,7 @@ import java.io.InputStream;
  *
  * @param <M> meta-data type which could be accompanying this request
  */
-public class JsonRequest<M> extends Request<M> {
+public class JsonRequest<M> extends AbstractRequest<M> {
 
   /**
    * Creates a new JSON request and use the specified URL as its end-point.

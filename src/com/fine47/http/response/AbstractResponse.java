@@ -27,7 +27,7 @@
 
 package com.fine47.http.response;
 
-import com.fine47.http.request.Request;
+import com.fine47.http.request.AbstractRequest;
 
 /**
  * An abstract response to handle results of type {@link E} and requests having
@@ -36,7 +36,7 @@ import com.fine47.http.request.Request;
  * @param <E> type of resources which the response handles
  * @param <M> meta-data type which could be accompanying the request
  */
-public interface Response<E, M> {
+public interface AbstractResponse<E, M> {
 
   /**
    * Returns whether the response handler in an "alive" condition when the time
@@ -52,7 +52,7 @@ public interface Response<E, M> {
    * @param response received from remote server
    * @param request original request for this response
    */
-  public void onSuccess(E response, Request<M> request);
+  public void onSuccess(E response, AbstractRequest<M> request);
 
   /**
    * A callback to be fired when an error has occurred during the operation to
@@ -62,5 +62,9 @@ public interface Response<E, M> {
    * @param request original request for this response
    * @param error that caused the failure
    */
-  public void onFailure(E response, Request<M> request, Throwable error);
+  public void onFailure(
+    E response,
+    AbstractRequest<M> request,
+    Throwable error
+  );
 }
