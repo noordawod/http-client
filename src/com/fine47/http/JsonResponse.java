@@ -27,38 +27,28 @@
 
 package com.fine47.http;
 
+import com.fine47.json.*;
+import org.json.*;
+
 /**
- * An abstract response to handle results of type {@link E} and requests having
- * accompanying meta-data of type {link M}.
+ * Interface for receiving and handling a JSON response, either an object or an
+ * array.
  *
- * @param <E> type of resources which the response handles
- * @param <M> meta-data type which could be accompanying the request
+ * @param <T> type of JSON entity which this response will handle
+ * @param <M> meta-data type which could be accompanying original request
  */
-public interface Response<E, M> {
+public interface JsonResponse<T extends JsonInterface, M> extends Response<T, M> {
 
   /**
-   * Returns whether the response handler in an "alive" condition when the time
-   * comes to fire its callbacks methods.
+   * Allows implementations to convert a native JSON entity ({@link JSONObject}
+   * or {@link JSONArray}) to a JSON value suitable for consumption by the
+   * handler.
    *
-   * @return TRUE if the response handler is alive, FALSE otherwise
-   */
-  public boolean isAlive();
-
-  /**
-   * A callback to be fired when the response has been received successfully.
+   * For your convenience, there are two abstract classes for converting to a
+   * {@link JsonObject} and {@link JsonArray}.
    *
-   * @param response received from remote server
-   * @param request original request for this response
+   * @param nativeJson
+   * @return
    */
-  public void onSuccess(E response, Request<M> request);
-
-  /**
-   * A callback to be fired when an error has occurred during the operation to
-   * receive a response from the remote server.
-   *
-   * @param response received from remote server, if any
-   * @param request original request for this response
-   * @param error that caused the failure
-   */
-  public void onFailure(E response, Request<M> request, Throwable error);
+  public T normalizeNativeJson(Object nativeJson);
 }

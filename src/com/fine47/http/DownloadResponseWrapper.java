@@ -27,38 +27,56 @@
 
 package com.fine47.http;
 
-/**
- * An abstract response to handle results of type {@link E} and requests having
- * accompanying meta-data of type {link M}.
- *
- * @param <E> type of resources which the response handles
- * @param <M> meta-data type which could be accompanying the request
- */
-public interface Response<E, M> {
+import com.fine47.cache.CacheInterface;
+import org.apache.http.HttpException;
 
-  /**
-   * Returns whether the response handler in an "alive" condition when the time
-   * comes to fire its callbacks methods.
-   *
-   * @return TRUE if the response handler is alive, FALSE otherwise
-   */
-  public boolean isAlive();
+class DownloadResponseWrapper
+  extends BinaryResponseWrapper
+  implements BinaryResponse<Object>
+{
 
-  /**
-   * A callback to be fired when the response has been received successfully.
-   *
-   * @param response received from remote server
-   * @param request original request for this response
-   */
-  public void onSuccess(E response, Request<M> request);
+  private final CacheInterface cache;
+  private final Response response;
 
-  /**
-   * A callback to be fired when an error has occurred during the operation to
-   * receive a response from the remote server.
-   *
-   * @param response received from remote server, if any
-   * @param request original request for this response
-   * @param error that caused the failure
-   */
-  public void onFailure(E response, Request<M> request, Throwable error);
+  public DownloadResponseWrapper(
+    CacheInterface cache,
+    Request request,
+    Response response
+  ) {
+    super(request);
+
+    // Add response handler.
+    addHandler(DownloadResponseWrapper.this);
+
+    // Keep references to parameters.
+    this.cache = cache;
+    this.response = response;
+  }
+
+  @Override
+  public boolean isAlive() {
+    return response.isAlive();
+  }
+
+  @Override
+  public void onSuccess(byte[] bytes, Request request) {
+    if(null == bytes || 0 == bytes.length) {
+      response.onFailure(
+        bytes,
+        request,
+        new HttpException("Downloaded zero bytes from remote server")
+      );
+    } else {
+      // Store the result in the cache always.
+      Object value = cache.store(request.url, bytes);
+
+      // Fire the callback.
+      response.onSuccess(value, request);
+    }
+  }
+
+  @Override
+  public void onFailure(byte[] bytes, Request request, Throwable error) {
+    response.onFailure(null, request, error);
+  }
 }

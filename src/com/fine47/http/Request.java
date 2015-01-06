@@ -1,3 +1,30 @@
+/**
+ * This file is part of HTTP Client library.
+ * Copyright (C) 2014 Noor Dawod. All rights reserved.
+ * https://github.com/noordawod/http-client
+ *
+ * Released under the MIT license
+ * http://en.wikipedia.org/wiki/MIT_License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
 package com.fine47.http;
 
 import android.util.Log;
@@ -10,7 +37,16 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
-public class Request extends RequestParams {
+/**
+ * The base class for all requests that are to be handled by this library.
+ *
+ * @param <M> meta-data type which could be accompanying this request
+ */
+public class Request<M> extends RequestParams {
+
+  public enum TYPE {
+    HEAD, GET, POST, PUT, PATCH, DELETE
+  };
 
   /**
    * The request's end-point URL.
@@ -18,9 +54,9 @@ public class Request extends RequestParams {
   public final String url;
 
   /**
-   * Whether this request could be cached or not.
+   * Optional meta-data to accompany this request.
    */
-  public final boolean noCache;
+  public final M metaData;
 
   /**
    * The headers to send along with this request.
@@ -39,7 +75,7 @@ public class Request extends RequestParams {
    * @param url request URL
    */
   public Request(String url) {
-    this(url, null);
+    this(url, null, null);
   }
 
   /**
@@ -50,24 +86,33 @@ public class Request extends RequestParams {
    * @param contentType request's content type
    */
   public Request(String url, String contentType) {
-    this(url, contentType, true);
+    this(url, contentType, null);
   }
 
   /**
    * Create a new request for the specified end-point URL along with the
-   * specified content type and optionally enable caching.
+   * specified content type. Caching will be disabled.
    *
-   * Note that caching is not implemented by this library at this point.
+   * @param url request URL
+   * @param metaData optional meta-data to accompany the request
+   */
+  public Request(String url, M metaData) {
+    this(url, null, metaData);
+  }
+
+  /**
+   * Create a new request for the specified end-point URL along with the
+   * specified content type and optionally an accompanying meta-data.
    *
    * @param url request URL
    * @param contentType request's content type
-   * @param noCache TRUE to enable caching for this request
+   * @param metaData optional meta-data to accompany the request
    */
-  protected Request(String url, String contentType, boolean noCache) {
+  protected Request(String url, String contentType, M metaData) {
     super();
 
     this.url = url;
-    this.noCache = noCache;
+    this.metaData = metaData;
     this.contentType = contentType;
 
     // Add a header to signal that we can decode GZIP data.
@@ -78,13 +123,15 @@ public class Request extends RequestParams {
     );
 
     if(ActivityHttpClient.isDebugging()) {
-      Log.d(ActivityHttpClient.LOG_TAG, "Request: \n" + this);
+      Log.d(ActivityHttpClient.LOG_TAG, "Request: " + this);
     }
   }
 
   @Override
   public String toString() {
-    return url + " (" + (noCache ? "Not cached" : "Cached") + ")";
+    return url + (
+      null == contentType ? "" : "(Content-Type: " + contentType + ")"
+    );
   }
 
   /**

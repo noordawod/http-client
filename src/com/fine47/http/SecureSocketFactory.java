@@ -1,3 +1,30 @@
+/**
+ * This file is part of HTTP Client library.
+ * Copyright (C) 2014 Noor Dawod. All rights reserved.
+ * https://github.com/noordawod/http-client
+ *
+ * Released under the MIT license
+ * http://en.wikipedia.org/wiki/MIT_License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
 package com.fine47.http;
 
 import android.util.Log;
@@ -27,18 +54,29 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 
+/**
+ * A concise and robust SSL factory to connect to custom HTTPS backend using a
+ * custom certificate using {@link KeyStore}s and aliases. In order to make
+ * this an easy process, only a key store and an alias it required.
+ *
+ * Before utilizing certificates, however, one must register a key store and
+ * alias using {@link #register(String, KeyStore, String)} function. This needs
+ * to be done only once.
+ *
+ * Afterwards, one needs to use {@link #getInstance(String)} to get a factory
+ * for the factory identifier.
+ */
 public class SecureSocketFactory extends SSLSocketFactory {
 
   private final static ConcurrentHashMap<String, SecureSocketFactory>
     instances = new ConcurrentHashMap();
 
-  private final String storeId;
   private final SSLContext sslCtx;
   private final X509Certificate[] acceptedIssuers;
   private final PublicKey publicKey;
 
   private SecureSocketFactory(
-    String storeId,
+    String factoryId,
     KeyStore store,
     String alias
   ) throws
@@ -62,18 +100,16 @@ public class SecureSocketFactory extends SSLSocketFactory {
 
     if(null == x509ca) {
       throw new CertificateException(
-        "Found expired SSL certificate in this store: " + storeId);
+        "Found expired SSL certificate in this store: " + factoryId);
     }
 
     // Check the CA's validity.
     x509ca.checkValidity();
 
-    this.storeId = storeId;
-
     // Accepted CA is only the one installed in the store.
     acceptedIssuers = new X509Certificate[] {x509ca};
 
-    // Get public key.
+    // Get the public key.
     publicKey = rootca.getPublicKey();
 
     sslCtx = SSLContext.getInstance("TLS");
@@ -99,19 +135,36 @@ public class SecureSocketFactory extends SSLSocketFactory {
           error = new CertificateException("Authentication type is invalid");
         } else try {
           for(X509Certificate cert : chain) {
-/*
             if(ActivityHttpClient.isDebugging()) {
-              Log.d(LOG_TAG, "Server Certificate Details:");
-              Log.d(LOG_TAG, "---------------------------");
-              Log.d(LOG_TAG, "IssuerDN: " + cert.getIssuerDN().toString());
-              Log.d(LOG_TAG, "SubjectDN: " + cert.getSubjectDN().toString());
-              Log.d(LOG_TAG, "Serial Number: " + cert.getSerialNumber());
-              Log.d(LOG_TAG, "Version: " + cert.getVersion());
-              Log.d(LOG_TAG, "Not before: " + cert.getNotBefore().toGMTString());
-              Log.d(LOG_TAG, "Not after: " + cert.getNotAfter().toGMTString());
-              Log.d(LOG_TAG, "---------------------------");
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "Server Certificate Details:");
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "---------------------------");
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "IssuerDN: " + cert.getIssuerDN().toString());
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "SubjectDN: " + cert.getSubjectDN().toString());
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "Serial Number: " + cert.getSerialNumber());
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "Version: " + cert.getVersion());
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "Not before: " + cert.getNotBefore().toString());
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "Not after: " + cert.getNotAfter().toString());
+              Log.d(
+                ActivityHttpClient.LOG_TAG,
+                "---------------------------");
             }
-*/
+
             // Make sure that it hasn't expired.
             cert.checkValidity();
 
@@ -145,8 +198,22 @@ public class SecureSocketFactory extends SSLSocketFactory {
     setHostnameVerifier(SSLSocketFactory.STRICT_HOSTNAME_VERIFIER);
   }
 
+  /**
+   * Registers a key store and an alias to be collectively identified by the
+   * specified factory identifier.
+   *
+   * @param factoryId unique identifier for specified key store and alias
+   * @param store key store containing the certificate
+   * @param alias pointing to the certificate
+   * @return newly-created SSL factory instance
+   * @throws CertificateException
+   * @throws NoSuchAlgorithmException
+   * @throws KeyManagementException
+   * @throws KeyStoreException
+   * @throws UnrecoverableKeyException
+   */
   public static SecureSocketFactory register(
-    String storeId,
+    String factoryId,
     KeyStore store,
     String alias
   ) throws
@@ -157,22 +224,32 @@ public class SecureSocketFactory extends SSLSocketFactory {
     UnrecoverableKeyException
   {
     synchronized(instances) {
-      SecureSocketFactory instance = instances.get(storeId);
+      SecureSocketFactory instance = instances.get(factoryId);
       if(null != instance) {
         throw new IllegalArgumentException(
-          "This store has been registered already: " + storeId);
+          "This store has been registered already: " + factoryId);
       }
-      instance = new SecureSocketFactory(storeId, store, alias);
-      instances.put(storeId, instance);
+      instance = new SecureSocketFactory(factoryId, store, alias);
+      instances.put(factoryId, instance);
       return instance;
     }
   }
 
-  public static SecureSocketFactory getInstance(
-    String storeId,
-    KeyStore store,
-    String alias
-  ) throws
+  /**
+   * Returns a previously-registered SSL factory instance identified by the
+   * specified factory identifier. Note that a previous call must have been
+   * made to {@link #register(String, KeyStore, String)} prior to one's ability
+   * to call this method.
+   *
+   * @param factoryId unique identifier of request SSL factory instance
+   * @return previously-created SSL factory instance
+   * @throws CertificateException
+   * @throws NoSuchAlgorithmException
+   * @throws KeyManagementException
+   * @throws KeyStoreException
+   * @throws UnrecoverableKeyException
+   */
+  public static SecureSocketFactory getInstance(String factoryId) throws
     CertificateException,
     NoSuchAlgorithmException,
     KeyManagementException,
@@ -180,10 +257,10 @@ public class SecureSocketFactory extends SSLSocketFactory {
     UnrecoverableKeyException
   {
     synchronized(instances) {
-      SecureSocketFactory instance = instances.get(storeId);
+      SecureSocketFactory instance = instances.get(factoryId);
       if(null == instance) {
         throw new IllegalArgumentException(
-          "This store has not been registered yet: " + storeId);
+          "This store has not been registered yet: " + factoryId);
       }
       return instance;
     }
@@ -209,18 +286,30 @@ public class SecureSocketFactory extends SSLSocketFactory {
       .createSocket();
   }
 
-  public String getStoreId() {
-    return storeId;
-  }
-
+  /**
+   * Returns the SSL context associated with this SSL factory.
+   *
+   * @return SSL context
+   */
   public SSLContext getSslContext() {
     return sslCtx;
   }
 
+  /**
+   * Returns the accepted issuers contained within the attached key store. The
+   * issuers are identified by their X.509 certificates.
+   *
+   * @return list of accepted issuers
+   */
   public X509Certificate[] getAcceptedIssuers() {
     return acceptedIssuers;
   }
 
+  /**
+   * Returns the public key embedded in the attached key store.
+   *
+   * @return public key
+   */
   public PublicKey getPublicKey() {
     return publicKey;
   }

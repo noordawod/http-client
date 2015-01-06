@@ -1,3 +1,30 @@
+/**
+ * This file is part of HTTP Client library.
+ * Copyright (C) 2014 Noor Dawod. All rights reserved.
+ * https://github.com/noordawod/http-client
+ *
+ * Released under the MIT license
+ * http://en.wikipedia.org/wiki/MIT_License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
 package com.fine47.http;
 
 import android.content.Context;
@@ -5,19 +32,31 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.util.Log;
-import com.fine47.json.JsonArrayInterface;
-import com.fine47.json.JsonObjectInterface;
-import com.loopj.android.http.AsyncHttpClient;
+import com.fine47.cache.CacheInterface;
+import com.fine47.json.*;
+import com.loopj.android.http.*;
+import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.Date;
+import java.util.*;
 import javax.net.ssl.SSLException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
+/**
+ * An {@see android.app.Activity}-based HTTP client. Use this if you'd like to
+ * control HTTP requests by activity and have the ability to collectively cancel
+ * requests belonging to an activity.
+ *
+ * Otherwise, it's most wise to use {@link AppHttpClient} which is an App-wide
+ * HTTP client and should be a better choice to fights memory leaks.
+ *
+ * @see AppHttpClient
+ */
 public class ActivityHttpClient extends AsyncHttpClient {
 
+  /**
+   * MIME content type for JSON entities.
+   */
   public final static String CONTENT_TYPE_JSON = "application/json";
 
   /**
@@ -25,10 +64,16 @@ public class ActivityHttpClient extends AsyncHttpClient {
    */
   public final static String LOG_TAG = "ActivityHttpClient";
 
+  /**
+   * Reusable exception when implementation is inaccessible.
+   */
+  public final static UnsupportedOperationException
+    NO_ACCESS = new UnsupportedOperationException();
+
   private static String userAgent = System.getProperty("http.agent");
 
-  protected final Class<? extends JsonObjectInterface> jsonObjectClass;
-  protected final Class<? extends JsonArrayInterface> jsonArrayClass;
+  private final HashMap<CacheInterface, DownloadManager>
+    downloadManagers = new HashMap();
 
   private static boolean isDebugging;
 
@@ -62,14 +107,8 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * Create a new HTTP client and attach it to the specified context.
    *
    * @param ctx context to attach the HTTP client to
-   * @param jsonObjectClass JSON object class handler
-   * @param jsonArrayClass JSON array class handler
    */
-  public ActivityHttpClient(
-    Context ctx,
-    Class<? extends JsonObjectInterface> jsonObjectClass,
-    Class<? extends JsonArrayInterface> jsonArrayClass
-  ) {
+  public ActivityHttpClient(Context ctx) {
     super();
 
     // Set up sane retry classes for a mobile device.
@@ -85,10 +124,8 @@ public class ActivityHttpClient extends AsyncHttpClient {
     setResponseTimeout(30000);
     setMaxRetriesAndTimeout(DEFAULT_MAX_RETRIES, 250);
 
-    // Initialize initial values.
+    // Keep the context.
     this.ctx = ctx;
-    this.jsonObjectClass = jsonObjectClass;
-    this.jsonArrayClass = jsonArrayClass;
 
     // Initial network state; run it on a separate thread.
     getThreadPool().execute(new Runnable() {
@@ -118,6 +155,13 @@ public class ActivityHttpClient extends AsyncHttpClient {
    */
   public void shutdown() {
     cancelRequests();
+    synchronized(downloadManagers) {
+      final Collection<DownloadManager> managers = downloadManagers.values();
+      for(final DownloadManager manager : managers) {
+        manager.shutdown();
+      }
+      downloadManagers.clear();
+    }
     ctx = null;
   }
 
@@ -172,66 +216,6 @@ public class ActivityHttpClient extends AsyncHttpClient {
    */
   public void cancelRequests(boolean mayInterruptIfRunning) {
     cancelRequests(ctx, mayInterruptIfRunning);
-  }
-
-  /**
-   * Converts a native Android JSON object into a JSON object of the defined
-   * type for this HTTP client.
-   *
-   * @param data JSON object data to convert
-   * @return converted JSON object
-   */
-  public JsonObjectInterface normalizeJson(JSONObject data) {
-    Exception error;
-    try {
-      // Create a new JSON object.
-      JsonObjectInterface json = jsonObjectClass.newInstance();
-
-      // If there's an initial data, embed it in.
-      if(null != data) {
-        json.merge(data);
-      }
-
-      return json;
-    } catch(InstantiationException e) {
-      error = e;
-    } catch(IllegalAccessException e) {
-      error = e;
-    }
-    if(isDebugging()) {
-      Log.e(LOG_TAG, "Unable to instantiate a new JSON object.", error);
-    }
-    return null;
-  }
-
-  /**
-   * Converts a native Android JSON array into a JSON array of the defined
-   * type for this HTTP client.
-   *
-   * @param data JSON array data to convert
-   * @return converted JSON array
-   */
-  public JsonArrayInterface normalizeJson(JSONArray data) {
-    Exception error;
-    try {
-      // Create a new JSON object.
-      JsonArrayInterface json = jsonArrayClass.newInstance();
-
-      // If there's an initial data, embed it in.
-      if(null != data) {
-        json.merge(data);
-      }
-
-      return json;
-    } catch(InstantiationException e) {
-      error = e;
-    } catch(IllegalAccessException e) {
-      error = e;
-    }
-    if(isDebugging()) {
-      Log.e(LOG_TAG, "Unable to instantiate a new JSON array.", error);
-    }
-    return null;
   }
 
   /**
@@ -343,45 +327,258 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Dispatches the specified request to the HTTP client and use the specified
-   * response object to handle the result or any errors.
+   * Returns a cache-backed download manager for easily working with cacheable
+   * Internet resources.
    *
-   * @param request to dispatch
-   * @param response to handle the result
+   * @param <E> type of resources which the download manager handles
+   * @param cache the cache instance to use with the download manager
+   * @return download manager ready for use
    */
-  public void dispatch(Request request, Response response) {
-    if(isDebugging()) {
-      Log.d(LOG_TAG, "Dispatching: POST " + request.url);
+  public <E>DownloadManager getDownloadManager(
+    CacheInterface<String, E> cache
+  ) {
+    synchronized(downloadManagers) {
+      if(null == cache) {
+        throw new IllegalArgumentException(
+          "A caching engine must be provided to the download manager.");
+      }
+      DownloadManager downloadManager = downloadManagers.get(cache);
+      if(null == downloadManager) {
+        downloadManager = new DownloadManager<E>(this, cache);
+        downloadManagers.put(cache, downloadManager);
+      }
+      return downloadManager;
     }
-    post(ctx,
-      request.url,
-      request.getHeaders(),
+  }
+
+  /**
+   * Dispatches the specified JSON request to the HTTP client and use the
+   * specified JSON response instance to handle the result or any errors.
+   *
+   * @param <T> type of JSON entity which will be received
+   * @param <M> meta-data type which could be accompanying this request
+   * @param type type of request to dispatch
+   * @param request JSON request to dispatch
+   * @param response JSON handler to handle the result
+   * @throws java.io.IOException
+   */
+  public <T extends JsonInterface, M>void dispatch(
+    Request.TYPE type,
+    JsonRequest<M> request,
+    JsonResponse<T, M> response
+  )
+    throws IOException
+  {
+    dispatch(
+      type,
       request,
-      request.contentType,
-      new ResponseHandler(this, response)
+      new JsonResponseWrapper(request, response)
     );
   }
 
   /**
-   * Dispatches the specified binary request to the HTTP client and use the
-   * specified response object to handle the result or any errors.
+   * Dispatches the specified image request to the HTTP client and use the
+   * specified image response instance to handle the result or any errors.
    *
-   * Binary requests will cause the response to be fired *always* within the
-   * pool thread, so if the response needs to update the UI, it must submit a
-   * task to the UI thread.
+   * @param <M> meta-data type which could be accompanying this request
+   * @param type type of request to dispatch
+   * @param request image request to dispatch
+   * @param response image handler to handle the result
+   * @throws java.io.IOException
+   */
+  public <M>void dispatch(
+    Request.TYPE type,
+    ImageRequest<M> request,
+    ImageResponse<M> response
+  )
+    throws IOException
+  {
+    dispatch(
+      type,
+      request,
+      new ImageResponseWrapper(request, response)
+    );
+  }
+
+  /**
+   * Dispatches the specified generic request to the HTTP client and use the
+   * specified generic response instance to handle the result or any errors.
+   *
+   * @param <M> meta-data type which could be accompanying this request
+   * @param type type of request to dispatch
+   * @param request generic request to dispatch
+   * @param handler generic handler to handle the result
+   * @throws IOException
+   */
+  public <M>void dispatch(
+    Request.TYPE type,
+    Request<M> request,
+    ResponseHandlerInterface handler
+  )
+    throws IOException
+  {
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching: " + request.url);
+    }
+    switch(type) {
+      case HEAD:
+        headImpl(request, handler);
+        break;
+
+      case GET:
+        getImpl(request, handler);
+        break;
+
+      case POST:
+        postImpl(request, handler);
+        break;
+
+      case PUT:
+        putImpl(request, handler);
+        break;
+
+      case PATCH:
+        patchImpl(request, handler);
+        break;
+
+      case DELETE:
+        deleteImpl(request, handler);
+        break;
+    }
+  }
+
+  /**
+   * Enable overloading of the logic for dispatching a HEAD request.
    *
    * @param request to dispatch
-   * @param response to handle the result
+   * @param handler response to handle the result
+   * @see Request.TYPE#HEAD
    */
-  public void dispatch(BinaryRequest request, BinaryResponse response) {
-    if(isDebugging()) {
-      Log.d(LOG_TAG, "Dispatching: GET " + request.url);
-    }
-    get(ctx,
+  protected void headImpl(Request request, ResponseHandlerInterface handler) {
+    head(
+      ctx,
       request.url,
       request.getHeaders(),
       request,
-      new BinaryResponseHandler(request.url, response)
+      handler
     );
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching HEAD: " + request.url);
+    }
+  }
+
+  /**
+   * Enable overloading of the logic for dispatching a GET request.
+   *
+   * @param request to dispatch
+   * @param handler response to handle the result
+   * @see Request.TYPE#GET
+   */
+  protected void getImpl(Request request, ResponseHandlerInterface handler) {
+    get(
+      ctx,
+      request.url,
+      request.getHeaders(),
+      request,
+      handler
+    );
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching GET: " + request.url);
+    }
+  }
+
+  /**
+   * Enable overloading of the logic for dispatching a POST request.
+   *
+   * @param request to dispatch
+   * @param handler response to handle the result
+   * @see Request.TYPE#POST
+   * @throws java.io.IOException
+   */
+  protected void postImpl(Request request, ResponseHandlerInterface handler)
+    throws IOException
+  {
+    post(
+      ctx,
+      request.url,
+      request.getHeaders(),
+      request.getEntity(handler),
+      request.contentType,
+      handler
+    );
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching HEAD: " + request.url);
+    }
+  }
+
+  /**
+   * Enable overloading of the logic for dispatching a PUT request.
+   *
+   * @param request to dispatch
+   * @param handler response to handle the result
+   * @see Request.TYPE#PUT
+   * @throws java.io.IOException
+   */
+  protected void putImpl(Request request, ResponseHandlerInterface handler)
+    throws IOException
+  {
+    put(
+      ctx,
+      request.url,
+      request.getHeaders(),
+      request.getEntity(handler),
+      request.contentType,
+      handler
+    );
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching PUT: " + request.url);
+    }
+  }
+
+  /**
+   * Enable overloading of the logic for dispatching a PATCH request.
+   *
+   * @param request to dispatch
+   * @param handler response to handle the result
+   * @see Request.TYPE#PATCH
+   * @throws java.io.IOException
+   */
+  protected void patchImpl(Request request, ResponseHandlerInterface handler)
+    throws IOException
+  {
+    patch(
+      ctx,
+      request.url,
+      request.getHeaders(),
+      request.getEntity(handler),
+      request.contentType,
+      handler
+    );
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching PATCH: " + request.url);
+    }
+  }
+
+  /**
+   * Enable overloading of the logic for dispatching a DELETE request.
+   *
+   * @param request to dispatch
+   * @param handler response to handle the result
+   * @see Request.TYPE#DELETE
+   * @throws java.io.IOException
+   */
+  protected void deleteImpl(Request request, ResponseHandlerInterface handler)
+    throws IOException
+  {
+    delete(
+      ctx,
+      request.url,
+      request.getEntity(handler),
+      request.contentType,
+      handler
+    );
+    if(isDebugging()) {
+      Log.d(LOG_TAG, "Dispatching DELETE: " + request.url);
+    }
   }
 }

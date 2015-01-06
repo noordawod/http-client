@@ -27,38 +27,20 @@
 
 package com.fine47.http;
 
+import android.graphics.Bitmap;
+
 /**
- * An abstract response to handle results of type {@link E} and requests having
- * accompanying meta-data of type {link M}.
+ * A response handler targeting Internet images.
  *
- * @param <E> type of resources which the response handles
  * @param <M> meta-data type which could be accompanying the request
  */
-public interface Response<E, M> {
+public interface ImageResponse<M> extends Response<Bitmap, M> {
 
   /**
-   * Returns whether the response handler in an "alive" condition when the time
-   * comes to fire its callbacks methods.
+   * Whether the generated {@link Bitmap} should be mutable (able to be
+   * manipulated) or immutable.
    *
-   * @return TRUE if the response handler is alive, FALSE otherwise
+   * @return TRUE if the image should be mutable
    */
-  public boolean isAlive();
-
-  /**
-   * A callback to be fired when the response has been received successfully.
-   *
-   * @param response received from remote server
-   * @param request original request for this response
-   */
-  public void onSuccess(E response, Request<M> request);
-
-  /**
-   * A callback to be fired when an error has occurred during the operation to
-   * receive a response from the remote server.
-   *
-   * @param response received from remote server, if any
-   * @param request original request for this response
-   * @param error that caused the failure
-   */
-  public void onFailure(E response, Request<M> request, Throwable error);
+  public boolean isMutable();
 }
