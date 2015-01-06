@@ -22,10 +22,10 @@ Dependencies
 The library depends on these libraries:
 
 * [AsyncHttpClient]()
-* [Android-Cache](https://github.com/noordawod/android-cache) A simple, fast and
+* [Android-Cache](https://github.com/noordawod/android-cache) -- simple, fast and
   robust caching library for Android (also written by myself)
-* [JsonInterface](https://github.com/noordawod/json-interface) A simple
-  interface for working with any JSON implementation (also written by myself)
+* [JsonInterface](https://github.com/noordawod/json-interface) -- an interface 
+  for working with any JSON implementation (also written by myself)
 
 At the moment, I have not pushed any Maven or Gradle artifcats so you'll have to
 manage with picking up the different JARs of these libraries and placing them
