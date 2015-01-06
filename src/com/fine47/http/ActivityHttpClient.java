@@ -448,7 +448,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    *
    * @param request to dispatch
    * @param handler response to handle the result
-   * @see Request.TYPE#HEAD
+   * @see AbstractRequest.TYPE#HEAD
    */
   protected void headImpl(
     AbstractRequest request,
@@ -471,7 +471,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    *
    * @param request to dispatch
    * @param handler response to handle the result
-   * @see Request.TYPE#GET
+   * @see AbstractRequest.TYPE#GET
    */
   protected void getImpl(
     AbstractRequest request,
@@ -494,7 +494,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    *
    * @param request to dispatch
    * @param handler response to handle the result
-   * @see Request.TYPE#POST
+   * @see AbstractRequest.TYPE#POST
    */
   protected void postImpl(
     AbstractRequest request,
@@ -518,7 +518,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    *
    * @param request to dispatch
    * @param handler response to handle the result
-   * @see Request.TYPE#PUT
+   * @see AbstractRequest.TYPE#PUT
    */
   protected void putImpl(
     AbstractRequest request,
@@ -542,7 +542,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    *
    * @param request to dispatch
    * @param handler response to handle the result
-   * @see Request.TYPE#PATCH
+   * @see AbstractRequest.TYPE#PATCH
    */
   protected void patchImpl(
     AbstractRequest request,
@@ -566,7 +566,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    *
    * @param request to dispatch
    * @param handler response to handle the result
-   * @see Request.TYPE#DELETE
+   * @see AbstractRequest.TYPE#DELETE
    */
   protected void deleteImpl(
     AbstractRequest request,
