@@ -35,15 +35,15 @@ import android.util.Log;
 import com.fine47.cache.CacheInterface;
 import com.fine47.json.*;
 import com.loopj.android.http.*;
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.*;
 import javax.net.ssl.SSLException;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.ConnectTimeoutException;
 
 /**
- * An {@see android.app.Activity}-based HTTP client. Use this if you'd like to
+ * An {@link android.app.Activity}-based HTTP client. Use this if you'd like to
  * control HTTP requests by activity and have the ability to collectively cancel
  * requests belonging to an activity.
  *
@@ -360,15 +360,12 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param type type of request to dispatch
    * @param request JSON request to dispatch
    * @param response JSON handler to handle the result
-   * @throws java.io.IOException
    */
   public <T extends JsonInterface, M>void dispatch(
     Request.TYPE type,
     JsonRequest<M> request,
     JsonResponse<T, M> response
-  )
-    throws IOException
-  {
+  ) {
     dispatch(
       type,
       request,
@@ -384,15 +381,12 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param type type of request to dispatch
    * @param request image request to dispatch
    * @param response image handler to handle the result
-   * @throws java.io.IOException
    */
   public <M>void dispatch(
     Request.TYPE type,
     ImageRequest<M> request,
     ImageResponse<M> response
-  )
-    throws IOException
-  {
+  ) {
     dispatch(
       type,
       request,
@@ -408,15 +402,12 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param type type of request to dispatch
    * @param request generic request to dispatch
    * @param handler generic handler to handle the result
-   * @throws IOException
    */
   public <M>void dispatch(
     Request.TYPE type,
     Request<M> request,
     ResponseHandlerInterface handler
-  )
-    throws IOException
-  {
+  ) {
     if(isDebugging()) {
       Log.d(LOG_TAG, "Dispatching: " + request.url);
     }
@@ -448,7 +439,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Enable overloading of the logic for dispatching a HEAD request.
+   * Dispatches a HEAD request.
    *
    * @param request to dispatch
    * @param handler response to handle the result
@@ -468,7 +459,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Enable overloading of the logic for dispatching a GET request.
+   * Dispatches a GET request.
    *
    * @param request to dispatch
    * @param handler response to handle the result
@@ -488,21 +479,18 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Enable overloading of the logic for dispatching a POST request.
+   * Dispatches a POST request.
    *
    * @param request to dispatch
    * @param handler response to handle the result
    * @see Request.TYPE#POST
-   * @throws java.io.IOException
    */
-  protected void postImpl(Request request, ResponseHandlerInterface handler)
-    throws IOException
-  {
+  protected void postImpl(Request request, ResponseHandlerInterface handler) {
     post(
       ctx,
       request.url,
       request.getHeaders(),
-      request.getEntity(handler),
+      getEntity(request, handler),
       request.contentType,
       handler
     );
@@ -512,21 +500,18 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Enable overloading of the logic for dispatching a PUT request.
+   * Dispatches a PUT request.
    *
    * @param request to dispatch
    * @param handler response to handle the result
    * @see Request.TYPE#PUT
-   * @throws java.io.IOException
    */
-  protected void putImpl(Request request, ResponseHandlerInterface handler)
-    throws IOException
-  {
+  protected void putImpl(Request request, ResponseHandlerInterface handler) {
     put(
       ctx,
       request.url,
       request.getHeaders(),
-      request.getEntity(handler),
+      getEntity(request, handler),
       request.contentType,
       handler
     );
@@ -536,21 +521,18 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Enable overloading of the logic for dispatching a PATCH request.
+   * Dispatches a PATCH request.
    *
    * @param request to dispatch
    * @param handler response to handle the result
    * @see Request.TYPE#PATCH
-   * @throws java.io.IOException
    */
-  protected void patchImpl(Request request, ResponseHandlerInterface handler)
-    throws IOException
-  {
+  protected void patchImpl(Request request, ResponseHandlerInterface handler) {
     patch(
       ctx,
       request.url,
       request.getHeaders(),
-      request.getEntity(handler),
+      getEntity(request, handler),
       request.contentType,
       handler
     );
@@ -560,25 +542,43 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
-   * Enable overloading of the logic for dispatching a DELETE request.
+   * Dispatches a DELETE request.
    *
    * @param request to dispatch
    * @param handler response to handle the result
    * @see Request.TYPE#DELETE
-   * @throws java.io.IOException
    */
-  protected void deleteImpl(Request request, ResponseHandlerInterface handler)
-    throws IOException
-  {
+  protected void deleteImpl(Request request, ResponseHandlerInterface handler) {
     delete(
       ctx,
       request.url,
-      request.getEntity(handler),
+      getEntity(request, handler),
       request.contentType,
       handler
     );
     if(isDebugging()) {
       Log.d(LOG_TAG, "Dispatching DELETE: " + request.url);
+    }
+  }
+
+  /**
+   * Returns an HTTP entity for the specified request and response handler.
+   *
+   * @param request to dispatch
+   * @param handler response to handle the result
+   * @return HTTP entity on success, NULL otherwise
+   */
+  protected HttpEntity getEntity(
+    Request request,
+    ResponseHandlerInterface handler
+  ) {
+    try {
+      return request.getEntity(handler);
+    } catch(java.io.IOException error) {
+      if(isDebugging()) {
+        Log.e(LOG_TAG, "Cannot get HTTP entity for: " + request.url, error);
+      }
+      return null;
     }
   }
 }

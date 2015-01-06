@@ -28,7 +28,6 @@
 package com.fine47.http;
 
 import com.fine47.cache.CacheInterface;
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -80,14 +79,11 @@ public class DownloadManager<E> {
    * @param <M> meta-data type which could be accompanying this request
    * @param request JSON request to dispatch
    * @param response JSON handler to handle the result
-   * @throws java.io.IOException
    */
   public <M>void dispatch(
     ImageRequest<M> request,
     ImageResponse<M> response
-  )
-    throws IOException
-  {
+  ) {
     dispatch(
       request,
       new ImageResponseWrapper(request, response)
@@ -101,14 +97,11 @@ public class DownloadManager<E> {
    * @param <M> meta-data type which could be accompanying this request
    * @param request generic request to dispatch
    * @param response generic handler to handle the result
-   * @throws java.io.IOException
    */
   public <M>void dispatch(
     final Request<M> request,
     final Response<E, M> response
-  )
-    throws IOException
-  {
+  ) {
     // Try to get a cached entry first for this URL.
     final E cacheEntry = cache.get(request.url);
 

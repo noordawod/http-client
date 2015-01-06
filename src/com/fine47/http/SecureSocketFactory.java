@@ -206,11 +206,11 @@ public class SecureSocketFactory extends SSLSocketFactory {
    * @param store key store containing the certificate
    * @param alias pointing to the certificate
    * @return newly-created SSL factory instance
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyManagementException
-   * @throws KeyStoreException
-   * @throws UnrecoverableKeyException
+   * @throws CertificateException on generic certificate exceptions
+   * @throws NoSuchAlgorithmException when requested algorithm is not found
+   * @throws KeyManagementException for an operation concerning key management
+   * @throws KeyStoreException on generic key store exceptions
+   * @throws UnrecoverableKeyException when a key cannot be recovered
    */
   public static SecureSocketFactory register(
     String factoryId,
@@ -243,11 +243,11 @@ public class SecureSocketFactory extends SSLSocketFactory {
    *
    * @param factoryId unique identifier of request SSL factory instance
    * @return previously-created SSL factory instance
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyManagementException
-   * @throws KeyStoreException
-   * @throws UnrecoverableKeyException
+   * @throws CertificateException on generic certificate exceptions
+   * @throws NoSuchAlgorithmException when requested algorithm is not found
+   * @throws KeyManagementException for an operation concerning key management
+   * @throws KeyStoreException on generic key store exceptions
+   * @throws UnrecoverableKeyException when a key cannot be recovered
    */
   public static SecureSocketFactory getInstance(String factoryId) throws
     CertificateException,

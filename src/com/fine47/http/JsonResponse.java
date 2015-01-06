@@ -27,7 +27,7 @@
 
 package com.fine47.http;
 
-import com.fine47.json.*;
+import com.fine47.json.JsonInterface;
 import org.json.*;
 
 /**
@@ -44,11 +44,8 @@ public interface JsonResponse<T extends JsonInterface, M> extends Response<T, M>
    * or {@link JSONArray}) to a JSON value suitable for consumption by the
    * handler.
    *
-   * For your convenience, there are two abstract classes for converting to a
-   * {@link JsonObject} and {@link JsonArray}.
-   *
-   * @param nativeJson
-   * @return
+   * @param nativeJson native JSON object or array
+   * @return JSON value for configured type
    */
   public T normalizeNativeJson(Object nativeJson);
 }

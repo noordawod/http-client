@@ -30,7 +30,7 @@ package com.fine47.http;
 import android.app.Application;
 
 /**
- * An {@see android.app.Application}-based HTTP client. Use this if you're not
+ * An {@link android.app.Application}-based HTTP client. Use this if you're not
  * interested in grouping requests by Activity or Context, which is the case
  * for most use cases.
  *
