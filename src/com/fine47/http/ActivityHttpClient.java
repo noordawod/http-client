@@ -27,6 +27,11 @@
 
 package com.fine47.http;
 
+import com.fine47.http.request.JsonRequest;
+import com.fine47.http.request.ImageRequest;
+import com.fine47.http.request.Request;
+import com.fine47.http.response.JsonResponse;
+import com.fine47.http.response.ImageResponse;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;

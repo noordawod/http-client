@@ -25,7 +25,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.fine47.http;
+package com.fine47.http.response;
+
+import com.fine47.http.request.Request;
 
 /**
  * An abstract response to handle results of type {@link E} and requests having

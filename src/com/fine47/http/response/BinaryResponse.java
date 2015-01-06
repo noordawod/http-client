@@ -25,27 +25,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.fine47.http;
-
-import com.fine47.json.JsonInterface;
-import org.json.*;
+package com.fine47.http.response;
 
 /**
- * Interface for receiving and handling a JSON response, either an object or an
- * array.
+ * A binary handler which works on byte arrays returned by remote servers. This
+ * is a low-level response handler and you'd be most interested in using any of
+ * its descendants instead.
  *
- * @param <T> type of JSON entity which this response will handle
- * @param <M> meta-data type which could be accompanying original request
+ * @param <M> meta-data type which could be accompanying the request
  */
-public interface JsonResponse<T extends JsonInterface, M> extends Response<T, M> {
+public interface BinaryResponse<M> extends Response<byte[], M> {
 
-  /**
-   * Allows implementations to convert a native JSON entity ({@link JSONObject}
-   * or {@link JSONArray}) to a JSON value suitable for consumption by the
-   * handler.
-   *
-   * @param nativeJson native JSON object or array
-   * @return JSON value for configured type
-   */
-  public T normalizeNativeJson(Object nativeJson);
 }

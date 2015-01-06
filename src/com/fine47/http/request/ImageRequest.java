@@ -25,7 +25,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.fine47.http;
+package com.fine47.http.request;
 
 import android.graphics.Bitmap;
 

@@ -30,6 +30,11 @@ package com.fine47.http;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import com.fine47.http.ActivityHttpClient;
+import com.fine47.http.request.ImageRequest;
+import com.fine47.http.request.Request;
+import com.fine47.http.response.BinaryResponse;
+import com.fine47.http.response.ImageResponse;
 
 class ImageResponseWrapper<M>
   extends BinaryResponseWrapper

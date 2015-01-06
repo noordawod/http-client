@@ -25,15 +25,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.fine47.http;
+package com.fine47.http.response;
+
+import android.graphics.Bitmap;
 
 /**
- * A binary handler which works on byte arrays returned by remote servers. This
- * is a low-level response handler and you'd be most interested in using any of
- * its descendants instead.
+ * A response handler targeting Internet images.
  *
  * @param <M> meta-data type which could be accompanying the request
  */
-public interface BinaryResponse<M> extends Response<byte[], M> {
+public interface ImageResponse<M> extends Response<Bitmap, M> {
 
+  /**
+   * Whether the generated {@link Bitmap} should be mutable (able to be
+   * manipulated) or immutable.
+   *
+   * @return TRUE if the image should be mutable
+   */
+  public boolean isMutable();
 }

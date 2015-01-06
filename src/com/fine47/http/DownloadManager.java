@@ -27,6 +27,10 @@
 
 package com.fine47.http;
 
+import com.fine47.http.request.Request;
+import com.fine47.http.request.ImageRequest;
+import com.fine47.http.response.Response;
+import com.fine47.http.response.ImageResponse;
 import com.fine47.cache.CacheInterface;
 import java.util.concurrent.ExecutorService;
 

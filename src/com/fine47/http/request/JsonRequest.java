@@ -25,8 +25,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.fine47.http;
+package com.fine47.http.request;
 
+import com.fine47.http.ActivityHttpClient;
 import com.fine47.json.JsonArrayInterface;
 import com.fine47.json.JsonObjectInterface;
 import java.io.InputStream;

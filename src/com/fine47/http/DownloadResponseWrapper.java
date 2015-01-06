@@ -28,6 +28,9 @@
 package com.fine47.http;
 
 import com.fine47.cache.CacheInterface;
+import com.fine47.http.request.Request;
+import com.fine47.http.response.BinaryResponse;
+import com.fine47.http.response.Response;
 import org.apache.http.HttpException;
 
 class DownloadResponseWrapper

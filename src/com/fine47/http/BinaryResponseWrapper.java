@@ -28,6 +28,9 @@
 package com.fine47.http;
 
 import android.util.Log;
+import com.fine47.http.ActivityHttpClient;
+import com.fine47.http.request.Request;
+import com.fine47.http.response.BinaryResponse;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -25,22 +25,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.fine47.http;
+package com.fine47.http.response;
 
-import android.graphics.Bitmap;
+import com.fine47.json.JsonInterface;
+import org.json.*;
 
 /**
- * A response handler targeting Internet images.
+ * Interface for receiving and handling a JSON response, either an object or an
+ * array.
  *
- * @param <M> meta-data type which could be accompanying the request
+ * @param <T> type of JSON entity which this response will handle
+ * @param <M> meta-data type which could be accompanying original request
  */
-public interface ImageResponse<M> extends Response<Bitmap, M> {
+public interface JsonResponse<T extends JsonInterface, M> extends Response<T, M> {
 
   /**
-   * Whether the generated {@link Bitmap} should be mutable (able to be
-   * manipulated) or immutable.
+   * Allows implementations to convert a native JSON entity ({@link JSONObject}
+   * or {@link JSONArray}) to a JSON value suitable for consumption by the
+   * handler.
    *
-   * @return TRUE if the image should be mutable
+   * @param nativeJson native JSON object or array
+   * @return JSON value for configured type
    */
-  public boolean isMutable();
+  public T normalizeNativeJson(Object nativeJson);
 }
