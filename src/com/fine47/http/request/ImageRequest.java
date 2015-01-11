@@ -62,7 +62,7 @@ public class ImageRequest<M> extends AbstractRequest<M> {
    * @param metaData optional meta-data to accompany the request
    */
   public ImageRequest(String url, M metaData) {
-    this(url, getPreferredBitmapConfig(), null);
+    this(url, getPreferredBitmapConfig(), metaData);
   }
 
   /**
