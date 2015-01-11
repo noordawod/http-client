@@ -31,44 +31,29 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import com.fine47.http.request.ImageRequest;
-import com.fine47.http.request.AbstractRequest;
-import com.fine47.http.response.BinaryResponse;
 import com.fine47.http.response.ImageResponse;
 
 class ImageResponseWrapper<M>
-  extends BinaryResponseWrapper
-  implements BinaryResponse<M>
+  extends AbstractResponseWrapper<Bitmap, M>
 {
 
-  private final ImageResponse response;
-
   public ImageResponseWrapper(
-    ImageRequest request,
-    ImageResponse response
+    ImageRequest<M> request,
+    ImageResponse<M> response
   ) {
-    super(request);
-
-    // Add response handler.
-    addHandler(ImageResponseWrapper.this);
-
-    // Keep references to parameters.
-    this.response = response;
+    super(new String[] {"^image/[a-z-]+$"}, request, response);
   }
 
   @Override
-  public boolean isAlive() {
-    return response.isAlive();
-  }
-
-  @Override
-  public void onSuccess(byte[] bytes, AbstractRequest request) {
+  Bitmap bytesToValue(byte[] bytes) {
     final ImageRequest imageRequest = (ImageRequest)request;
-
+    final ImageResponse imageResponse = (ImageResponse)response;
+    
     // Use high-resolution first to generate the bitmap.
     Bitmap bitmap = generateBitmap(
       Bitmap.Config.ARGB_8888,
       bytes,
-      response.isMutable()
+      imageResponse.isMutable()
     );
 
     // If fallback configuration is not the highest, try it also.
@@ -76,36 +61,14 @@ class ImageResponseWrapper<M>
       bitmap = generateBitmap(
         Bitmap.Config.ARGB_8888,
         bytes,
-        response.isMutable()
+        imageResponse.isMutable()
       );
     }
-
-    // If bitmap isn't generated, fire failure callback.
-    if(null == bitmap) {
-      response.onFailure(
-        null,
-        imageRequest,
-        new RuntimeException(
-          "Error while decoding " +
-            bytes.length +
-          " bytes to generate the bitmap"
-        )
-      );
-    } else {
-      response.onSuccess(bitmap, imageRequest);
-    }
+    
+    return bitmap;
   }
 
-  @Override
-  public void onFailure(
-    byte[] bytes,
-    AbstractRequest request,
-    Throwable error
-  ) {
-    response.onFailure(null, request, error);
-  }
-
-  private Bitmap generateBitmap(
+  static Bitmap generateBitmap(
     Bitmap.Config config,
     byte[] bytes,
     boolean isMutable
@@ -124,7 +87,7 @@ class ImageResponseWrapper<M>
           error
         );
       }
-      return null;
     }
+    return null;
   }
 }

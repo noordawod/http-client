@@ -38,6 +38,7 @@ import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.util.Log;
 import com.fine47.cache.CacheInterface;
+import com.fine47.http.response.BinaryResponse;
 import com.fine47.json.*;
 import com.loopj.android.http.*;
 import java.net.SocketTimeoutException;
@@ -400,6 +401,27 @@ public class ActivityHttpClient extends AsyncHttpClient {
   }
 
   /**
+   * Dispatches the specified abstract request to the HTTP client and use the
+   * specified binary response instance to handle the result or any errors.
+   *
+   * @param <M> meta-data type which could be accompanying this request
+   * @param type type of request to dispatch
+   * @param request abstract request to dispatch
+   * @param response binary handler to handle the result
+   */
+  public <E, M>void dispatch(
+    AbstractRequest.TYPE type,
+    AbstractRequest<M> request,
+    BinaryResponse<M> response
+  ) {
+    dispatch(
+      type,
+      request,
+      (new BinaryResponseWrapper(request, response))
+    );
+  }
+
+  /**
    * Dispatches the specified generic request to the HTTP client and use the
    * specified generic response instance to handle the result or any errors.
    *
@@ -408,10 +430,10 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param request generic request to dispatch
    * @param handler generic handler to handle the result
    */
-  public <M>void dispatch(
+  <E, M>void dispatch(
     AbstractRequest.TYPE type,
     AbstractRequest<M> request,
-    ResponseHandlerInterface handler
+    AbstractResponseWrapper<E, M> handler
   ) {
     if(isDebugging()) {
       Log.d(LOG_TAG, "Dispatching: " + request.url);
@@ -509,7 +531,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
       handler
     );
     if(isDebugging()) {
-      Log.d(LOG_TAG, "Dispatching HEAD: " + request.url);
+      Log.d(LOG_TAG, "Dispatching POST: " + request.url);
     }
   }
 

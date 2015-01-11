@@ -27,117 +27,24 @@
 
 package com.fine47.http;
 
-import android.util.Log;
 import com.fine47.http.request.JsonRequest;
 import com.fine47.http.response.JsonResponse;
 import com.fine47.json.JsonInterface;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import org.apache.http.Header;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.loopj.android.http.RequestParams;
 
-class JsonResponseWrapper extends JsonHttpResponseHandler {
+class JsonResponseWrapper<T extends JsonInterface, M> 
+  extends AbstractResponseWrapper<T, M> 
+{
 
-  private final JsonRequest request;
-  private final JsonResponse response;
-
-  public JsonResponseWrapper(JsonRequest request, JsonResponse response) {
-    super();
-
-    // Always use the pool thread to fire callbacks.
-    setUsePoolThread(true);
-
-    // Keep references to parameters.
-    this.request = request;
-    this.response = response;
-  }
-
-  @Override
-  public void onCancel() {
-  }
-
-  @Override
-  public void onSuccess(
-    int statusCode,
-    Header[] headers,
-    JSONObject result
+  public JsonResponseWrapper(
+    JsonRequest<M> request, 
+    JsonResponse<T, M> response
   ) {
-    JsonInterface json = response.normalizeNativeJson(result);
-    if(ActivityHttpClient.isDebugging()) {
-      Log.d(
-        ActivityHttpClient.LOG_TAG,
-        "Response JSON (Object): \n" +
-        (null == json ? "null" : json.toString())
-      );
-    }
-    response.onSuccess(json, request);
+    super(new String[] {RequestParams.APPLICATION_JSON}, request, response);
   }
 
   @Override
-  public void onSuccess(
-    int statusCode,
-    Header[] headers,
-    JSONArray result
-  ) {
-    JsonInterface json = response.normalizeNativeJson(result);
-    if(ActivityHttpClient.isDebugging()) {
-      Log.d(
-        ActivityHttpClient.LOG_TAG,
-        "Response JSON (Array): \n" +
-        (null == result ? "null" : result.toString())
-      );
-    }
-    response.onSuccess(json, request);
-  }
-
-  @Override
-  public void onFailure(
-    int statusCode,
-    Header[] headers,
-    String result,
-    Throwable error
-  ) {
-    onFailure(
-      statusCode,
-      headers,
-      error,
-      (JSONObject)null
-    );
-  }
-
-  @Override
-  public void onFailure(
-    int statusCode,
-    Header[] headers,
-    Throwable error,
-    JSONObject result
-  ) {
-    JsonInterface json = response.normalizeNativeJson(result);
-    if(ActivityHttpClient.isDebugging()) {
-      Log.d(
-        ActivityHttpClient.LOG_TAG,
-        "Failure while expecting JSON (Object) result: \n" +
-        (null == json ? "null" : json.toString())
-      );
-    }
-    response.onFailure(json, request, error);
-  }
-
-  @Override
-  public void onFailure(
-    int statusCode,
-    Header[] headers,
-    Throwable error,
-    JSONArray result
-  ) {
-    JsonInterface json = response.normalizeNativeJson(result);
-    if(ActivityHttpClient.isDebugging()) {
-      Log.e(
-        ActivityHttpClient.LOG_TAG,
-        "Failure while expecting JSON (Array) result: \n" +
-        (null == json ? "null" : json.toString())
-      );
-    }
-    response.onFailure(json, request, error);
+  T bytesToValue(byte[] bytes) {
+    return ((JsonResponse<T, M>)response).convertBytes(bytes);
   }
 }

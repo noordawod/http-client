@@ -28,10 +28,9 @@
 package com.fine47.http;
 
 import com.fine47.http.request.AbstractRequest;
-import com.fine47.http.request.ImageRequest;
-import com.fine47.http.response.AbstractResponse;
-import com.fine47.http.response.ImageResponse;
 import com.fine47.cache.CacheInterface;
+import com.fine47.http.response.AbstractResponse;
+import com.fine47.http.response.BinaryResponse;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -53,7 +52,7 @@ public class DownloadManager<E> {
    */
   public final CacheInterface<String, E> cache;
 
-  DownloadManager(ActivityHttpClient client, CacheInterface cache) {
+  DownloadManager(ActivityHttpClient client, CacheInterface<String, E> cache) {
     this.client = client;
     this.cache = cache;
   }
@@ -77,24 +76,6 @@ public class DownloadManager<E> {
   }
 
   /**
-   * Dispatches the specified JSON request to the HTTP client and use the
-   * specified JSON response instance to handle the result or any errors.
-   *
-   * @param <M> meta-data type which could be accompanying this request
-   * @param request JSON request to dispatch
-   * @param response JSON handler to handle the result
-   */
-  public <M>void dispatch(
-    ImageRequest<M> request,
-    ImageResponse<M> response
-  ) {
-    dispatch(
-      request,
-      new ImageResponseWrapper(request, response)
-    );
-  }
-
-  /**
    * Dispatch a request to download a resource from the Internet. All downloads
    * use GET method.
    *
@@ -111,15 +92,12 @@ public class DownloadManager<E> {
 
     // If there's no cached entry...
     if(null == cacheEntry) {
-      // Dispatch a request to download this URL.
-      client.getImpl(
-        request,
-        new DownloadResponseWrapper(cache, request, response)
-      );
+      getImpl(request, response);
     } else {
       // Cached entry is available, let's call the response handler on a
       // thread pool, as is expected.
       final ExecutorService threadPool = client.getThreadPool();
+
       if(null == threadPool) {
         // No thread pool configured, so call the handler directly.
         response.onSuccess(cacheEntry, request);
@@ -134,5 +112,50 @@ public class DownloadManager<E> {
         });
       }
     }
+  }
+  
+  protected <M>void getImpl(
+    final AbstractRequest<M> request,
+    final AbstractResponse<E, M> response
+  ) {
+    // Dispatch a request to download this URL.
+    client.getImpl(
+      request,
+      new BinaryResponseWrapper(request, new BinaryResponse<M>() {
+
+        @Override
+        public boolean isAlive() {
+          return response.isAlive();
+        }
+
+        @Override
+        public void onSuccess(
+          byte[] bytes, 
+          AbstractRequest<M> req
+        ) {
+          E cacheEntry = cache.store(request.url, bytes);
+          if(null == cacheEntry) {
+            // Cache entry not saved, call failure handler.
+            onFailure(
+              null, 
+              null, 
+              new RuntimeException("Unable to store bytes into cache.")
+            );
+          } else {
+            // Cache entry has been saved, call success handler.
+            response.onSuccess(cacheEntry, request);
+          }
+        }
+
+        @Override
+        public void onFailure(
+          byte[] bytes, 
+          AbstractRequest<M> req, 
+          Throwable error
+        ) {
+          response.onFailure(null, request, error);
+        }
+      })
+    );
   }
 }

@@ -28,7 +28,6 @@
 package com.fine47.http.response;
 
 import com.fine47.json.JsonInterface;
-import org.json.*;
 
 /**
  * Interface for receiving and handling a JSON response, either an object or an
@@ -42,12 +41,11 @@ public interface JsonResponse<T extends JsonInterface, M>
 {
 
   /**
-   * Allows implementations to convert a native JSON entity ({@link JSONObject}
-   * or {@link JSONArray}) to a JSON value suitable for consumption by the
-   * handler.
+   * Allows implementations to convert a a byte array to the JSON value handled
+   * by this implementation.
    *
-   * @param nativeJson native JSON object or array
+   * @param bytes byte array representing the JSON value
    * @return JSON value for configured type
    */
-  public T normalizeNativeJson(Object nativeJson);
+  public T convertBytes(byte[] bytes);
 }
