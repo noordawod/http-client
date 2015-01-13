@@ -409,7 +409,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * @param request abstract request to dispatch
    * @param response binary handler to handle the result
    */
-  public <E, M>void dispatch(
+  public <M>void dispatch(
     AbstractRequest.TYPE type,
     AbstractRequest<M> request,
     BinaryResponse<M> response
@@ -425,6 +425,7 @@ public class ActivityHttpClient extends AsyncHttpClient {
    * Dispatches the specified generic request to the HTTP client and use the
    * specified generic response instance to handle the result or any errors.
    *
+   * @param <E> type of resources which is expected from the request
    * @param <M> meta-data type which could be accompanying this request
    * @param type type of request to dispatch
    * @param request generic request to dispatch

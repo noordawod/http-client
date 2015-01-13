@@ -34,13 +34,19 @@ import com.loopj.android.http.BinaryHttpResponseHandler;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 
-abstract class AbstractResponseWrapper<E, M> 
-  extends BinaryHttpResponseHandler 
+/**
+ * Base response handler for all others. This, and those, are internal classes.
+ *
+ * @param <E> type of resources which is expected from the request
+ * @param <M> meta-data type which could be accompanying the request
+ */
+abstract class AbstractResponseWrapper<E, M>
+  extends BinaryHttpResponseHandler
 {
 
   final AbstractRequest<M> request;
   final AbstractResponse<E, M> response;
-  
+
   public AbstractResponseWrapper(
     AbstractRequest<M> request,
     AbstractResponse<E, M> response
@@ -69,7 +75,7 @@ abstract class AbstractResponseWrapper<E, M>
     this.request = request;
     this.response = response;
   }
-  
+
   @Override
   public void onCancel() {
     if(ActivityHttpClient.isDebugging()) {
@@ -98,14 +104,14 @@ abstract class AbstractResponseWrapper<E, M>
   ) {
     E value;
     if(
-      null == bytes || 
-      0 == bytes.length || 
+      null == bytes ||
+      0 == bytes.length ||
       null == (value = bytesToValue(bytes))
     ) {
       onFailure(
-        statusCode, 
-        headers, 
-        bytes, 
+        statusCode,
+        headers,
+        bytes,
         new HttpException(
           "Response body is empty or cannot be converted to a value."
         )
@@ -129,8 +135,8 @@ abstract class AbstractResponseWrapper<E, M>
     Throwable error
   ) {
     response.onFailure(
-      null == bytes ? null : bytesToValue(bytes), 
-      request, 
+      null == bytes ? null : bytesToValue(bytes),
+      request,
       error
     );
     if(ActivityHttpClient.isDebugging()) {
