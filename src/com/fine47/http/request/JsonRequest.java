@@ -27,10 +27,12 @@
 
 package com.fine47.http.request;
 
+import android.util.Log;
 import com.fine47.http.ActivityHttpClient;
 import com.fine47.json.JsonArrayInterface;
 import com.fine47.json.JsonObjectInterface;
 import java.io.InputStream;
+import org.json.JSONException;
 
 /**
  * A JSON request with easy methods to set data to be sent to a remote server.
@@ -87,7 +89,17 @@ public class JsonRequest<M> extends AbstractRequest<M> {
    * @param value JSON object to add to the request
    */
   public void put(String key, JsonObjectInterface value) {
-    put(key, value.getNative());
+    try {
+      put(key, new org.json.JSONObject(value.getAsString()));
+    } catch (JSONException error) {
+      if(ActivityHttpClient.isDebugging()) {
+        Log.e(
+          ActivityHttpClient.LOG_TAG,
+          "Unable to attach a JSON object: " + value,
+          error
+        );
+      }
+    }
   }
 
   /**
@@ -97,7 +109,45 @@ public class JsonRequest<M> extends AbstractRequest<M> {
    * @param value JSON array to add to the request
    */
   public void put(String key, JsonArrayInterface value) {
-    put(key, value.getNative());
+    try {
+      put(key, new org.json.JSONArray(value.getAsString()));
+    } catch (JSONException error) {
+      if(ActivityHttpClient.isDebugging()) {
+        Log.e(
+          ActivityHttpClient.LOG_TAG,
+          "Unable to attach a JSON array: " + value,
+          error
+        );
+      }
+    }
+  }
+
+  /**
+   * Cycles through the JSON object's keys and adds them, along with their
+   * values, to the request.
+   *
+   * @param json JSON object data to add to the request
+   */
+  public void put(JsonObjectInterface json) {
+    if(null == json) {
+      return;
+    }
+
+    final String[] keys = json.keys();
+    for(final String key : keys) {
+      Object value = json.get(key);
+      if(value instanceof JsonObjectInterface) {
+        put(key, (JsonObjectInterface)value);
+      } else if(value instanceof JsonArrayInterface) {
+        put(key, (JsonArrayInterface)value);
+      } else if(value instanceof Number) {
+        put(key, (Number)value);
+      } else if(value instanceof Boolean) {
+        put(key, (Boolean)value);
+      } else {
+        put(key, value.toString());
+      }
+    }
   }
 
   /**
